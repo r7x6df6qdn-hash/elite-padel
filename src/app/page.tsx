@@ -103,24 +103,24 @@ export default async function HomePage() {
             <h2 className="font-headline text-4xl italic">Court Rental</h2>
             <div className="h-px flex-grow mx-8 bg-outline-variant/30" />
             <span className="font-label text-xs tracking-widest uppercase text-on-surface-variant">
-              Standard &amp; Doppel Courts
+              Doppel &amp; Einzel Courts
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            {/* Standard Courts Card (Large) */}
+            {/* Doppel Courts Card (Large) */}
             <div className="md:col-span-7 group relative overflow-hidden rounded-xl bg-surface-container-low p-12 flex flex-col justify-between min-h-[450px]">
               <div className="relative z-10">
                 <span className="font-label text-xs tracking-widest uppercase text-secondary mb-2 block">
-                  2 Courts verfügbar
+                  4 Courts verfügbar
                 </span>
-                <h3 className="font-headline text-5xl mb-6">Einzel Courts</h3>
+                <h3 className="font-headline text-5xl mb-6">Doppel Courts</h3>
                 <ul className="space-y-3 font-body text-sm text-on-surface-variant mb-8">
                   <li className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-lg">
                       check
                     </span>
-                    Perfekt für 4 Spieler
+                    Extra-große Courts für bis zu 8 Spieler
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-lg">
@@ -139,7 +139,7 @@ export default async function HomePage() {
               <div className="relative z-10 flex items-end justify-between">
                 <div>
                   <span className="font-body text-4xl font-light">
-                    ab {formatPrice(24)}
+                    ab {formatPrice(38)}
                   </span>
                   <span className="font-label text-xs tracking-widest uppercase ml-2 text-on-surface-variant">
                     / Stunde
@@ -161,22 +161,22 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Doppel Courts Card */}
+            {/* Einzel Courts Card (Small) */}
             <div className="md:col-span-5 group relative overflow-hidden rounded-xl bg-surface-container-highest p-12 flex flex-col justify-between min-h-[450px]">
               <div className="relative z-10">
                 <span className="font-label text-xs tracking-widest uppercase text-primary mb-2 block">
-                  4 Courts verfügbar
+                  2 Courts verfügbar
                 </span>
-                <h3 className="font-headline text-5xl mb-6">Doppel Courts</h3>
+                <h3 className="font-headline text-5xl mb-6">Einzel Courts</h3>
                 <p className="font-body text-sm text-on-surface-variant mb-8 leading-relaxed">
-                  Extra-große Courts für bis zu 8 Spieler. Die vibrierende
-                  Energie des Elite Padel erwartet dich.
+                  Perfekt für 4 Spieler. Kompakte Courts mit
+                  erstklassiger Ausstattung.
                 </p>
               </div>
               <div className="relative z-10 flex flex-col gap-6">
                 <div className="flex items-baseline">
                   <span className="font-body text-4xl font-light">
-                    ab {formatPrice(38)}
+                    ab {formatPrice(24)}
                   </span>
                   <span className="font-label text-xs tracking-widest uppercase ml-2 text-on-surface-variant">
                     / Stunde
@@ -222,26 +222,26 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Wellness Card */}
+          {/* Gym Card */}
           <div className="md:col-span-2 md:row-span-1 relative rounded-xl overflow-hidden group">
             <img
-              alt="Wellness"
+              alt="Gym"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              src="/bistro.png"
+              src="/cinematic.png"
             />
             <div className="absolute inset-0 bg-stone-900/40 group-hover:bg-stone-900/30 transition-colors" />
             <div className="absolute bottom-10 left-10 text-white">
               <span className="font-label text-[10px] uppercase tracking-[0.3em] mb-2 block">
-                Restoration
+                Performance
               </span>
               <h3 className="font-headline text-3xl italic mb-4">
-                Wellness &amp; Recovery
+                Gym &amp; Fitness
               </h3>
               <a
                 href="#"
                 className="inline-flex items-center gap-2 font-label text-xs uppercase tracking-widest border-b border-white/40 pb-1"
               >
-                View Sanctuary
+                Explore Gym
               </a>
             </div>
           </div>
@@ -251,7 +251,7 @@ export default async function HomePage() {
             <img
               alt="Bistro"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              src="/cinematic.png"
+              src="/bistro.png"
             />
             <div className="absolute inset-0 bg-stone-900/20 group-hover:bg-stone-900/10 transition-colors" />
             <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">

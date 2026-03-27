@@ -120,7 +120,7 @@ export default async function HomePage() {
                     <span className="material-symbols-outlined text-lg">
                       check
                     </span>
-                    Extra-große Courts für bis zu 8 Spieler
+                    Perfekt für bis zu 4 Spieler
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-lg">
@@ -169,7 +169,7 @@ export default async function HomePage() {
                 </span>
                 <h3 className="font-headline text-5xl mb-6">Einzel Courts</h3>
                 <p className="font-body text-sm text-on-surface-variant mb-8 leading-relaxed">
-                  Perfekt für 4 Spieler. Kompakte Courts mit
+                  Ideal für 2 Spieler. Kompakte Courts mit
                   erstklassiger Ausstattung.
                 </p>
               </div>

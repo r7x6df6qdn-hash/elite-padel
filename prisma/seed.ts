@@ -7,13 +7,13 @@ async function main() {
   for (let i = 1; i <= 2; i++) {
     await prisma.court.upsert({
       where: { id: `court-standard-${i}` },
-      update: { name: `Einzel Court ${i}`, description: `Einzel Padel Court ${i} - für bis zu 4 Spieler` },
+      update: { name: `Einzel Court ${i}`, description: `Einzel Padel Court ${i} - für bis zu 2 Spieler` },
       create: {
         id: `court-standard-${i}`,
         name: `Einzel Court ${i}`,
         type: "standard",
         pricePerHour: 24,
-        description: `Einzel Padel Court ${i} - für bis zu 4 Spieler`,
+        description: `Einzel Padel Court ${i} - für bis zu 2 Spieler`,
       },
     });
   }

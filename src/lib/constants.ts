@@ -11,13 +11,13 @@ export const PEAK_HOUR = 16; // Ab 16 Uhr gelten Peak-Preise
 export const COURT_TYPES = {
   standard: {
     label: "Einzel Court",
-    maxPlayers: 4,
+    maxPlayers: 2,
     priceOffPeak: 24,
     pricePeak: 28,
   },
   double: {
     label: "Doppel Court",
-    maxPlayers: 8,
+    maxPlayers: 4,
     priceOffPeak: 38,
     pricePeak: 40,
   },

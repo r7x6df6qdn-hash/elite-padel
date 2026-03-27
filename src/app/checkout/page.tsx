@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { formatTime, formatPrice, COURT_TYPES } from "@/lib/constants";
+import { formatTime, formatPrice, COURT_TYPES, calculateTotalPrice, getPriceForHour, PEAK_HOUR } from "@/lib/constants";
 
 export default function CheckoutPage() {
   const searchParams = useSearchParams();
@@ -222,15 +222,17 @@ export default function CheckoutPage() {
             </div>
 
             <div className="bg-white/50 rounded-lg p-8 space-y-4 border border-white">
-              <div className="flex justify-between text-sm font-light">
-                <span className="text-on-surface-variant">
-                  {hours}h &times; {formatPrice(totalPrice / hours)}
-                </span>
-                <span className="font-body font-bold">
-                  {formatPrice(totalPrice)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm font-light">
+              {Array.from({ length: hours }, (_, i) => startTime + i).map((hour) => (
+                <div key={hour} className="flex justify-between text-sm font-light">
+                  <span className="text-on-surface-variant">
+                    {formatTime(hour)} – {formatTime(hour + 1)}
+                  </span>
+                  <span className="font-body font-bold">
+                    {formatPrice(getPriceForHour(courtType, hour))}
+                  </span>
+                </div>
+              ))}
+              <div className="flex justify-between text-sm font-light pt-2 border-t border-stone-100">
                 <span className="text-on-surface-variant">
                   inkl. MwSt. (19%)
                 </span>

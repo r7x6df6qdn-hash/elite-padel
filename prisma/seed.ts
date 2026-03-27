@@ -12,7 +12,7 @@ async function main() {
         id: `court-standard-${i}`,
         name: `Court ${i}`,
         type: "standard",
-        pricePerHour: 40,
+        pricePerHour: 24,
         description: `Standard Padel Court ${i} - für bis zu 4 Spieler`,
       },
     });
@@ -27,7 +27,7 @@ async function main() {
         id: `court-double-${i}`,
         name: `Doppel Court ${i}`,
         type: "double",
-        pricePerHour: 60,
+        pricePerHour: 38,
         description: `Doppel Padel Court ${i} - extra großer Court`,
       },
     });

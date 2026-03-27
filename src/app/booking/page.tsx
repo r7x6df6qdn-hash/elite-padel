@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import DatePicker from "@/components/DatePicker";
 import TimeSlotGrid from "@/components/TimeSlotGrid";
 import BookingSummary from "@/components/BookingSummary";
@@ -22,6 +22,14 @@ interface BookedSlot {
 }
 
 export default function BookingPage() {
+  return (
+    <Suspense fallback={<div className="pt-40 text-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" /></div>}>
+      <BookingPageContent />
+    </Suspense>
+  );
+}
+
+function BookingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedCourt = searchParams.get("court");

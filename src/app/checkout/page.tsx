@@ -1,10 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { formatTime, formatPrice, COURT_TYPES, calculateTotalPrice, getPriceForHour, PEAK_HOUR } from "@/lib/constants";
 
 export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="pt-40 text-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" /></div>}>
+      <CheckoutPageContent />
+    </Suspense>
+  );
+}
+
+function CheckoutPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 

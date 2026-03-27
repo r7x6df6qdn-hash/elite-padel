@@ -53,9 +53,15 @@ function BookingPageContent() {
         fetch(`/api/bookings?date=${selectedDate}`),
       ]);
       const courtsData = await courtsRes.json();
-      const bookingsData = await bookingsRes.json();
-      setCourts(courtsData);
-      setBookedSlots(bookingsData);
+      if (Array.isArray(courtsData)) setCourts(courtsData);
+
+      if (bookingsRes.ok) {
+        const bookingsData = await bookingsRes.json();
+        if (Array.isArray(bookingsData)) setBookedSlots(bookingsData);
+        else setBookedSlots([]);
+      } else {
+        setBookedSlots([]);
+      }
     } catch (error) {
       console.error("Failed to fetch data:", error);
     }

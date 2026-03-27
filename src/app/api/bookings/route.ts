@@ -14,22 +14,27 @@ export async function GET(request: NextRequest) {
   const startOfDay = new Date(date + "T00:00:00.000Z");
   const endOfDay = new Date(date + "T23:59:59.999Z");
 
-  const bookings = await prisma.booking.findMany({
-    where: {
-      date: {
-        gte: startOfDay,
-        lte: endOfDay,
+  try {
+    const bookings = await prisma.booking.findMany({
+      where: {
+        date: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+        status: {
+          in: ["pending", "confirmed"],
+        },
       },
-      status: {
-        in: ["pending", "confirmed"],
+      select: {
+        courtId: true,
+        startTime: true,
+        endTime: true,
       },
-    },
-    select: {
-      courtId: true,
-      startTime: true,
-      endTime: true,
-    },
-  });
+    });
 
-  return NextResponse.json(bookings);
+    return NextResponse.json(bookings);
+  } catch (error) {
+    console.error("Failed to fetch bookings:", error);
+    return NextResponse.json([]);
+  }
 }

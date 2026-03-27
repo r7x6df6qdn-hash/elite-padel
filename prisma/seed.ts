@@ -3,26 +3,29 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // 4 Standard Courts (4er)
-  for (let i = 1; i <= 4; i++) {
+  // 2 Einzel Courts
+  for (let i = 1; i <= 2; i++) {
     await prisma.court.upsert({
       where: { id: `court-standard-${i}` },
-      update: {},
+      update: { name: `Einzel Court ${i}`, description: `Einzel Padel Court ${i} - für bis zu 4 Spieler` },
       create: {
         id: `court-standard-${i}`,
-        name: `Court ${i}`,
+        name: `Einzel Court ${i}`,
         type: "standard",
         pricePerHour: 24,
-        description: `Standard Padel Court ${i} - für bis zu 4 Spieler`,
+        description: `Einzel Padel Court ${i} - für bis zu 4 Spieler`,
       },
     });
   }
 
-  // 2 Doppel Courts
-  for (let i = 1; i <= 2; i++) {
+  // Alte Standard Courts 3 & 4 löschen (falls vorhanden)
+  await prisma.court.deleteMany({ where: { id: { in: ["court-standard-3", "court-standard-4"] } } });
+
+  // 4 Doppel Courts
+  for (let i = 1; i <= 4; i++) {
     await prisma.court.upsert({
       where: { id: `court-double-${i}` },
-      update: {},
+      update: { name: `Doppel Court ${i}`, description: `Doppel Padel Court ${i} - extra großer Court` },
       create: {
         id: `court-double-${i}`,
         name: `Doppel Court ${i}`,
@@ -33,7 +36,7 @@ async function main() {
     });
   }
 
-  console.log("Seed completed: 4 Standard Courts + 2 Doppel Courts");
+  console.log("Seed completed: 2 Einzel Courts + 4 Doppel Courts");
 }
 
 main()

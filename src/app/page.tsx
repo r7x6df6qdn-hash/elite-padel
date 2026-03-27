@@ -112,9 +112,9 @@ export default async function HomePage() {
             <div className="md:col-span-7 group relative overflow-hidden rounded-xl bg-surface-container-low p-12 flex flex-col justify-between min-h-[450px]">
               <div className="relative z-10">
                 <span className="font-label text-xs tracking-widest uppercase text-secondary mb-2 block">
-                  4 Courts verfügbar
+                  2 Courts verfügbar
                 </span>
-                <h3 className="font-headline text-5xl mb-6">Standard Courts</h3>
+                <h3 className="font-headline text-5xl mb-6">Einzel Courts</h3>
                 <ul className="space-y-3 font-body text-sm text-on-surface-variant mb-8">
                   <li className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-lg">
@@ -165,7 +165,7 @@ export default async function HomePage() {
             <div className="md:col-span-5 group relative overflow-hidden rounded-xl bg-surface-container-highest p-12 flex flex-col justify-between min-h-[450px]">
               <div className="relative z-10">
                 <span className="font-label text-xs tracking-widest uppercase text-primary mb-2 block">
-                  2 Courts verfügbar
+                  4 Courts verfügbar
                 </span>
                 <h3 className="font-headline text-5xl mb-6">Doppel Courts</h3>
                 <p className="font-body text-sm text-on-surface-variant mb-8 leading-relaxed">

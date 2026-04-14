@@ -371,7 +371,7 @@ export default function AdminPage() {
                   const confirmed = data.bookings.filter(
                     (b) => b.status === "confirmed" && new Date(b.date) >= cutoff
                   );
-                  const courts = [...new Set(confirmed.map((b) => b.court.name))];
+                  const courts = Array.from(new Set(confirmed.map((b) => b.court.name)));
                   const courtData = courts.map((name) => {
                     const cb = confirmed.filter((b) => b.court.name === name);
                     return { name, bookings: cb.length, revenue: cb.reduce((s, b) => s + b.totalPrice, 0) };

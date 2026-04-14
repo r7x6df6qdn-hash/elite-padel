@@ -40,7 +40,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData) {
   const courtTypeLabel = data.courtType === "double" ? "Doppel Court" : "Einzel Court";
 
   const { error } = await resend.emails.send({
-    from: "Elite Padel <booking@elitepadel.club>",
+    from: "Elite Padel <booking@elite-padel.de>",
     to: data.customerEmail,
     subject: `Buchungsbestätigung – ${data.courtName}, ${formatDate(data.date)}`,
     html: `

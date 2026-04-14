@@ -89,7 +89,8 @@ export default function AdminPage() {
   const [filter, setFilter] = useState<"all" | "confirmed" | "pending" | "cancelled">("all");
   const [customerSearch, setCustomerSearch] = useState("");
   const [chartRange, setChartRange] = useState<"7" | "30">("7");
-  const [courtRange, setCourtRange] = useState<"1" | "7" | "14" | "30">("7");
+  const [courtDateFrom, setCourtDateFrom] = useState(getLocalDate());
+  const [courtDateTo, setCourtDateTo] = useState(getLocalDate(daysFromNow(7)));
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -375,73 +376,125 @@ export default function AdminPage() {
 
             {/* Court Breakdown */}
             <div className="bg-surface-container-lowest rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
                   Auslastung pro Court
                 </h3>
-                <div className="flex gap-1 bg-surface-container-high rounded-lg p-1">
-                  {(["1", "7", "14", "30"] as const).map((r) => (
-                    <button
-                      key={r}
-                      onClick={() => setCourtRange(r)}
-                      className={`px-3 py-1.5 rounded-md font-label text-[10px] tracking-widest uppercase transition-all ${
-                        courtRange === r
-                          ? "bg-surface-container-lowest text-on-surface shadow-sm"
-                          : "text-on-surface-variant hover:text-on-surface"
-                      }`}
-                    >
-                      {r === "1" ? "Heute" : `${r}T`}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={courtDateFrom}
+                      onChange={(e) => setCourtDateFrom(e.target.value)}
+                      className="bg-surface-container-high text-on-surface text-[11px] font-label px-3 py-1.5 rounded-md border-none focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                    <span className="text-on-surface-variant text-[10px]">–</span>
+                    <input
+                      type="date"
+                      value={courtDateTo}
+                      onChange={(e) => setCourtDateTo(e.target.value)}
+                      className="bg-surface-container-high text-on-surface text-[11px] font-label px-3 py-1.5 rounded-md border-none focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                  <div className="flex gap-1 bg-surface-container-high rounded-lg p-1">
+                    {([["Heute", 0, 0], ["7T", 0, 6], ["14T", 0, 13], ["30T", 0, 29]] as const).map(([label, fromOff, toOff]) => (
+                      <button
+                        key={label}
+                        onClick={() => {
+                          setCourtDateFrom(getLocalDate(daysFromNow(fromOff)));
+                          setCourtDateTo(getLocalDate(daysFromNow(toOff)));
+                        }}
+                        className="px-3 py-1.5 rounded-md font-label text-[10px] tracking-widest uppercase transition-all text-on-surface-variant hover:text-on-surface"
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                {(() => {
-                  const days = parseInt(courtRange);
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  const cutoff = daysFromNow(days);
-                  const slotsPerDay = 16; // 08:00–24:00
+              {(() => {
+                const from = new Date(courtDateFrom + "T00:00:00");
+                const to = new Date(courtDateTo + "T23:59:59");
+                const days = Math.max(1, Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+                const slotsPerDay = 16; // 08:00–24:00
+
+                const confirmed = data.bookings.filter(
+                  (b) => b.status === "confirmed" && new Date(b.date) >= from && new Date(b.date) <= to
+                );
+
+                const courtData = data.courts.map((court) => {
+                  const cb = confirmed.filter((b) => b.courtId === court.id);
+                  const bookedSlots = cb.reduce((sum, b) => sum + (b.endTime - b.startTime), 0);
                   const totalSlots = slotsPerDay * days;
+                  const percent = Math.round((bookedSlots / totalSlots) * 100);
+                  return {
+                    name: court.name,
+                    bookings: cb.length,
+                    revenue: cb.reduce((s, b) => s + b.totalPrice, 0),
+                    percent,
+                    bookedSlots,
+                    totalSlots,
+                  };
+                }).sort((a, b) => b.percent - a.percent);
 
-                  const confirmed = data.bookings.filter(
-                    (b) => b.status === "confirmed" && new Date(b.date) >= today && new Date(b.date) < cutoff
-                  );
+                const totalBooked = courtData.reduce((s, c) => s + c.bookedSlots, 0);
+                const totalAvailable = courtData.reduce((s, c) => s + c.totalSlots, 0);
+                const totalPercent = Math.round((totalBooked / totalAvailable) * 100);
+                const totalRevenue = courtData.reduce((s, c) => s + c.revenue, 0);
+                const totalBookings = courtData.reduce((s, c) => s + c.bookings, 0);
 
-                  const courtData = data.courts.map((court) => {
-                    const cb = confirmed.filter((b) => b.courtId === court.id);
-                    const bookedSlots = cb.reduce((sum, b) => sum + (b.endTime - b.startTime), 0);
-                    const percent = Math.round((bookedSlots / totalSlots) * 100);
-                    return {
-                      name: court.name,
-                      bookings: cb.length,
-                      revenue: cb.reduce((s, b) => s + b.totalPrice, 0),
-                      percent,
-                      bookedSlots,
-                      totalSlots,
-                    };
-                  }).sort((a, b) => b.percent - a.percent);
-
-                  return courtData.map((c) => (
-                    <div key={c.name} className="flex items-center gap-4">
-                      <span className="text-sm w-32 shrink-0">{c.name}</span>
-                      <div className="flex-1 bg-surface-container-high rounded-full h-7 overflow-hidden">
-                        <div
-                          className="h-full bg-primary/70 rounded-full flex items-center px-3 transition-all duration-300"
-                          style={{ width: `${Math.max(c.percent, 4)}%` }}
-                        >
-                          <span className="text-[10px] text-on-primary font-label whitespace-nowrap">
-                            {c.percent}%
-                          </span>
+                return (
+                  <>
+                    {/* Total Utilization */}
+                    <div className="bg-surface-container rounded-xl p-5 mb-5 flex items-center gap-6">
+                      <div className="flex-1">
+                        <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-2">Gesamtauslastung</p>
+                        <div className="bg-surface-container-high rounded-full h-8 overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full flex items-center px-4 transition-all duration-300"
+                            style={{ width: `${Math.max(totalPercent, 4)}%` }}
+                          >
+                            <span className="text-xs text-on-primary font-label font-bold whitespace-nowrap">
+                              {totalPercent}%
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <span className="text-[10px] text-on-surface-variant font-label w-28 text-right shrink-0">
-                        {c.bookings}× · {formatPrice(c.revenue)}
-                      </span>
+                      <div className="text-right shrink-0">
+                        <p className="text-xl font-headline font-bold text-on-surface">{totalPercent}%</p>
+                        <p className="text-[10px] text-on-surface-variant font-label">
+                          {totalBookings} Buchungen · {formatPrice(totalRevenue)}
+                        </p>
+                        <p className="text-[10px] text-on-surface-variant font-label">
+                          {totalBooked}h / {totalAvailable}h · {days} {days === 1 ? "Tag" : "Tage"}
+                        </p>
+                      </div>
                     </div>
-                  ));
-                })()}
-              </div>
+
+                    {/* Per Court */}
+                    <div className="space-y-3">
+                      {courtData.map((c) => (
+                        <div key={c.name} className="flex items-center gap-4">
+                          <span className="text-sm w-32 shrink-0">{c.name}</span>
+                          <div className="flex-1 bg-surface-container-high rounded-full h-7 overflow-hidden">
+                            <div
+                              className="h-full bg-primary/70 rounded-full flex items-center px-3 transition-all duration-300"
+                              style={{ width: `${Math.max(c.percent, 4)}%` }}
+                            >
+                              <span className="text-[10px] text-on-primary font-label whitespace-nowrap">
+                                {c.percent}%
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] text-on-surface-variant font-label w-28 text-right shrink-0">
+                            {c.bookings}× · {formatPrice(c.revenue)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Today's Schedule */}

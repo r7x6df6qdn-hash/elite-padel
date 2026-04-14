@@ -51,7 +51,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData) {
   <style>
     body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1b1c1a; margin: 0; padding: 0; background: #faf9f6; }
     .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
-    .header { background: #69251b; padding: 40px 32px; text-align: center; }
+    .header { background: #4a1a12; padding: 40px 32px; text-align: center; }
     .header h1 { color: #ffffff; font-size: 24px; letter-spacing: 0.15em; margin: 0; font-weight: 300; }
     .content { padding: 40px 32px; }
     .greeting { font-size: 18px; margin-bottom: 24px; }
@@ -60,13 +60,13 @@ export async function sendBookingConfirmation(data: BookingConfirmationData) {
     .detail-row:last-child { border-bottom: none; }
     .detail-label { color: #6b6b6b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
     .detail-value { font-weight: 600; font-size: 15px; }
-    .access-box { background: #69251b; color: #ffffff; border-radius: 12px; padding: 32px; text-align: center; margin: 32px 0; }
+    .access-box { background: #4a1a12; color: #ffffff; border-radius: 12px; padding: 32px; text-align: center; margin: 32px 0; }
     .access-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.8; margin-bottom: 8px; }
     .access-code { font-size: 36px; font-weight: 700; letter-spacing: 0.3em; margin: 12px 0; }
     .access-note { font-size: 12px; opacity: 0.7; }
     .price-box { background: #faf9f6; border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center; }
     .price-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #6b6b6b; }
-    .price { font-size: 32px; font-weight: 700; color: #69251b; margin: 8px 0; }
+    .price { font-size: 32px; font-weight: 700; color: #4a1a12; margin: 8px 0; }
     .price-tax { font-size: 12px; color: #6b6b6b; }
     .info { background: #f5f0eb; border-radius: 12px; padding: 24px; margin: 24px 0; }
     .info h3 { font-size: 14px; margin: 0 0 12px 0; }
@@ -131,7 +131,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData) {
     </div>
     <div class="footer">
       <p>ELITE PADEL CLUB</p>
-      <p>concierge@elitepadel.club</p>
+      <p>booking@elite-padel.de</p>
       <p>Diese E-Mail wurde automatisch generiert. Bei Fragen kontaktiere uns per E-Mail.</p>
     </div>
   </div>

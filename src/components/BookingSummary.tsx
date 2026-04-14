@@ -89,21 +89,21 @@ export default function BookingSummary({
         </div>
       </div>
 
-      <div className="bg-white/50 rounded-lg p-8 space-y-4 border border-white">
-        <div className="flex justify-between text-sm font-light">
-          <span className="text-on-surface-variant">
+      <div className="bg-white/50 rounded-lg p-5 space-y-3 border border-white">
+        <div className="flex justify-between items-baseline text-sm font-light gap-2">
+          <span className="text-on-surface-variant whitespace-nowrap">
             Court Rental ({hours}h)
           </span>
-          <span className="font-body font-bold">{formatPrice(totalPrice)}</span>
+          <span className="font-body font-bold whitespace-nowrap">{formatPrice(totalPrice)}</span>
         </div>
-        <div className="flex justify-between text-sm font-light">
-          <span className="text-on-surface-variant">inkl. MwSt. (19%)</span>
-          <span className="font-body font-bold">
+        <div className="flex justify-between items-baseline text-sm font-light gap-2">
+          <span className="text-on-surface-variant whitespace-nowrap">inkl. MwSt. (19%)</span>
+          <span className="font-body font-bold whitespace-nowrap">
             {formatPrice(totalPrice * 0.19)}
           </span>
         </div>
-        <div className="pt-6 border-t border-stone-200 flex justify-between items-center">
-          <span className="font-headline italic text-xl">Investment</span>
+        <div className="pt-4 border-t border-stone-200 flex flex-col items-center gap-1">
+          <span className="font-headline italic text-base text-on-surface-variant">Investment</span>
           <span className="text-3xl font-headline italic text-primary">
             {formatPrice(totalPrice)}
           </span>

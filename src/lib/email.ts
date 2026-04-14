@@ -145,3 +145,88 @@ export async function sendBookingConfirmation(data: BookingConfirmationData) {
     throw error;
   }
 }
+
+interface CancellationData {
+  customerName: string;
+  customerEmail: string;
+  courtName: string;
+  date: string;
+  startTime: number;
+  endTime: number;
+  totalPrice: number;
+  bookingId: string;
+}
+
+export async function sendCancellationEmail(data: CancellationData) {
+  const { error } = await resend.emails.send({
+    from: "Elite Padel <booking@elite-padel.de>",
+    to: data.customerEmail,
+    subject: `Stornierung – ${data.courtName}, ${formatDate(data.date)}`,
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #1b1c1a; margin: 0; padding: 0; background: #faf9f6;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff;">
+    <div style="background: #4a1a12; padding: 40px 32px; text-align: center;">
+      <h1 style="color: #ffffff; font-size: 24px; letter-spacing: 0.15em; margin: 0; font-weight: 300;">ELITE PADEL</h1>
+    </div>
+    <div style="padding: 40px 32px;">
+      <p style="font-size: 18px; margin-bottom: 24px;">Hallo ${data.customerName},</p>
+      <p>deine Buchung wurde storniert. Hier die Details der stornierten Buchung:</p>
+
+      <div style="background: #faf9f6; border-radius: 12px; padding: 24px; margin: 24px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #e8e6e3;">
+              <div style="color: #6b6b6b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Court</div>
+              <div style="font-weight: 600; font-size: 15px; margin-top: 4px;">${data.courtName}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #e8e6e3;">
+              <div style="color: #6b6b6b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Datum</div>
+              <div style="font-weight: 600; font-size: 15px; margin-top: 4px;">${formatDate(data.date)}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #e8e6e3;">
+              <div style="color: #6b6b6b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Zeitfenster</div>
+              <div style="font-weight: 600; font-size: 15px; margin-top: 4px;">${formatTime(data.startTime)} – ${formatTime(data.endTime)} Uhr</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0;">
+              <div style="color: #6b6b6b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Status</div>
+              <div style="font-weight: 600; font-size: 15px; margin-top: 4px; color: #ba1a1a;">Storniert</div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <p style="font-size: 14px; color: #6b6b6b; line-height: 1.6;">
+        Der Betrag von <strong>${formatPrice(data.totalPrice)}</strong> wird dir in den nächsten Tagen erstattet.
+        Bei Fragen kontaktiere uns gerne per E-Mail.
+      </p>
+
+      <p style="font-size: 11px; color: #6b6b6b; text-align: center; margin-top: 16px;">
+        Buchungs-ID: ${data.bookingId}
+      </p>
+    </div>
+    <div style="padding: 32px; text-align: center; color: #6b6b6b; font-size: 11px; border-top: 1px solid #e8e6e3;">
+      <p>ELITE PADEL CLUB</p>
+      <p>booking@elite-padel.de</p>
+    </div>
+  </div>
+</body>
+</html>
+    `,
+  });
+
+  if (error) {
+    console.error("Failed to send cancellation email:", error);
+    throw error;
+  }
+}

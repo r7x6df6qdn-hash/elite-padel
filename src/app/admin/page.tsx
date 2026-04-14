@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 type Booking = {
   id: string;
@@ -56,14 +56,26 @@ function formatDateLong(dateStr: string) {
   });
 }
 
+function getLocalDate(d: Date = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function daysAgo(n: number) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d;
+}
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<"overview" | "bookings" | "customers">("overview");
+  const [tab, setTab] = useState<"dashboard" | "bookings" | "customers">("dashboard");
   const [filter, setFilter] = useState<"all" | "confirmed" | "pending" | "cancelled">("all");
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [chartRange, setChartRange] = useState<"7" | "30">("7");
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -103,6 +115,67 @@ export default function AdminPage() {
     });
     fetchDashboard();
   };
+
+  // Chart data
+  const chartData = useMemo(() => {
+    if (!data) return { labels: [], revenue: [], bookings: [] };
+    const days = parseInt(chartRange);
+    const confirmed = data.bookings.filter((b) => b.status === "confirmed");
+
+    const labels: string[] = [];
+    const revenue: number[] = [];
+    const bookingCounts: number[] = [];
+
+    for (let i = days - 1; i >= 0; i--) {
+      const d = daysAgo(i);
+      const dateStr = getLocalDate(d);
+      const dayBookings = confirmed.filter((b) => {
+        const bDate = new Date(b.date);
+        return getLocalDate(bDate) === dateStr;
+      });
+      labels.push(d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }));
+      revenue.push(dayBookings.reduce((sum, b) => sum + b.totalPrice, 0));
+      bookingCounts.push(dayBookings.length);
+    }
+
+    return { labels, revenue, bookings: bookingCounts };
+  }, [data, chartRange]);
+
+  // Customer data with search
+  const uniqueCustomers = useMemo(() => {
+    if (!data) return [];
+    const customers = Object.values(
+      data.bookings
+        .filter((b) => b.status === "confirmed")
+        .reduce((acc, b) => {
+          if (!acc[b.customerEmail]) {
+            acc[b.customerEmail] = {
+              name: b.customerName,
+              email: b.customerEmail,
+              phone: b.customerPhone,
+              bookings: 0,
+              totalSpent: 0,
+              lastBooking: b.createdAt,
+            };
+          }
+          acc[b.customerEmail].bookings++;
+          acc[b.customerEmail].totalSpent += b.totalPrice;
+          if (b.createdAt > acc[b.customerEmail].lastBooking) {
+            acc[b.customerEmail].lastBooking = b.createdAt;
+          }
+          return acc;
+        }, {} as Record<string, { name: string; email: string; phone: string | null; bookings: number; totalSpent: number; lastBooking: string }>)
+    );
+
+    if (!customerSearch) return customers;
+    const q = customerSearch.toLowerCase();
+    return customers.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        (c.phone && c.phone.includes(q))
+    );
+  }, [data, customerSearch]);
 
   // Login Screen
   if (!isAuthenticated) {
@@ -153,24 +226,10 @@ export default function AdminPage() {
     (b) => filter === "all" || b.status === filter
   );
 
-  const uniqueCustomers = Object.values(
-    data.bookings
-      .filter((b) => b.status === "confirmed")
-      .reduce((acc, b) => {
-        if (!acc[b.customerEmail]) {
-          acc[b.customerEmail] = {
-            name: b.customerName,
-            email: b.customerEmail,
-            phone: b.customerPhone,
-            bookings: 0,
-            totalSpent: 0,
-          };
-        }
-        acc[b.customerEmail].bookings++;
-        acc[b.customerEmail].totalSpent += b.totalPrice;
-        return acc;
-      }, {} as Record<string, { name: string; email: string; phone: string | null; bookings: number; totalSpent: number }>)
-  );
+  const maxRevenue = Math.max(...chartData.revenue, 1);
+  const maxBookings = Math.max(...chartData.bookings, 1);
+  const totalChartRevenue = chartData.revenue.reduce((a, b) => a + b, 0);
+  const totalChartBookings = chartData.bookings.reduce((a, b) => a + b, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -200,7 +259,7 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="flex gap-1 bg-surface-container-high rounded-lg p-1 mb-8 w-fit">
-          {(["overview", "bookings", "customers"] as const).map((t) => (
+          {(["dashboard", "bookings", "customers"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -210,14 +269,139 @@ export default function AdminPage() {
                   : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              {t === "overview" ? "Übersicht" : t === "bookings" ? "Buchungen" : "Kunden"}
+              {t === "dashboard" ? "Dashboard" : t === "bookings" ? "Buchungen" : "Kunden"}
             </button>
           ))}
         </div>
 
-        {/* Overview Tab */}
-        {tab === "overview" && (
+        {/* Dashboard Tab */}
+        {tab === "dashboard" && (
           <div className="space-y-8">
+            {/* Chart Range Toggle */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
+                Umsatz & Buchungen
+              </h2>
+              <div className="flex gap-1 bg-surface-container-high rounded-lg p-1">
+                {(["7", "30"] as const).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setChartRange(r)}
+                    className={`px-4 py-1.5 rounded-md font-label text-[10px] tracking-widest uppercase transition-all ${
+                      chartRange === r
+                        ? "bg-surface-container-lowest text-on-surface shadow-sm"
+                        : "text-on-surface-variant hover:text-on-surface"
+                    }`}
+                  >
+                    {r === "7" ? "7 Tage" : "30 Tage"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Revenue Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-surface-container-lowest rounded-xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Umsatz</p>
+                    <p className="text-2xl font-headline font-bold text-on-surface mt-1">{formatPrice(totalChartRevenue)}</p>
+                  </div>
+                  <span className="text-[10px] font-label tracking-widest uppercase text-on-surface-variant">
+                    Letzte {chartRange} Tage
+                  </span>
+                </div>
+                <div className="flex items-end gap-1 h-40">
+                  {chartData.revenue.map((val, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                      <div className="absolute -top-8 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                        {chartData.labels[i]}: {formatPrice(val)}
+                      </div>
+                      <div
+                        className="w-full bg-primary/80 rounded-t hover:bg-primary transition-colors min-h-[2px]"
+                        style={{ height: `${Math.max((val / maxRevenue) * 100, 1.5)}%` }}
+                      />
+                      {chartRange === "7" && (
+                        <span className="text-[9px] text-on-surface-variant">{chartData.labels[i]}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bookings Chart */}
+              <div className="bg-surface-container-lowest rounded-xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Buchungen</p>
+                    <p className="text-2xl font-headline font-bold text-on-surface mt-1">{totalChartBookings}</p>
+                  </div>
+                  <span className="text-[10px] font-label tracking-widest uppercase text-on-surface-variant">
+                    Letzte {chartRange} Tage
+                  </span>
+                </div>
+                <div className="flex items-end gap-1 h-40">
+                  {chartData.bookings.map((val, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                      <div className="absolute -top-8 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                        {chartData.labels[i]}: {val} Buchung{val !== 1 ? "en" : ""}
+                      </div>
+                      <div
+                        className="w-full bg-secondary/80 rounded-t hover:bg-secondary transition-colors min-h-[2px]"
+                        style={{ height: `${Math.max((val / maxBookings) * 100, 1.5)}%` }}
+                      />
+                      {chartRange === "7" && (
+                        <span className="text-[9px] text-on-surface-variant">{chartData.labels[i]}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Court Breakdown */}
+            <div className="bg-surface-container-lowest rounded-xl p-6">
+              <h3 className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-4">
+                Auslastung pro Court
+              </h3>
+              <div className="space-y-3">
+                {(() => {
+                  const days = parseInt(chartRange);
+                  const cutoff = daysAgo(days);
+                  const confirmed = data.bookings.filter(
+                    (b) => b.status === "confirmed" && new Date(b.date) >= cutoff
+                  );
+                  const courts = [...new Set(confirmed.map((b) => b.court.name))];
+                  const courtData = courts.map((name) => {
+                    const cb = confirmed.filter((b) => b.court.name === name);
+                    return { name, bookings: cb.length, revenue: cb.reduce((s, b) => s + b.totalPrice, 0) };
+                  }).sort((a, b) => b.revenue - a.revenue);
+                  const maxCourtRevenue = Math.max(...courtData.map((c) => c.revenue), 1);
+
+                  if (courtData.length === 0) {
+                    return <p className="text-on-surface-variant text-sm text-center py-4">Keine Daten für diesen Zeitraum</p>;
+                  }
+
+                  return courtData.map((c) => (
+                    <div key={c.name} className="flex items-center gap-4">
+                      <span className="text-sm w-32 shrink-0">{c.name}</span>
+                      <div className="flex-1 bg-surface-container-high rounded-full h-6 overflow-hidden">
+                        <div
+                          className="h-full bg-primary/70 rounded-full flex items-center px-3"
+                          style={{ width: `${Math.max((c.revenue / maxCourtRevenue) * 100, 8)}%` }}
+                        >
+                          <span className="text-[10px] text-on-primary font-label whitespace-nowrap">
+                            {c.bookings}× · {formatPrice(c.revenue)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </div>
+
+            {/* Today's Schedule */}
             <div>
               <h2 className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-4">
                 Heutige Buchungen
@@ -250,37 +434,6 @@ export default function AdminPage() {
                   </table>
                 </div>
               )}
-            </div>
-
-            {/* Recent Bookings */}
-            <div>
-              <h2 className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-4">
-                Letzte Buchungen
-              </h2>
-              <div className="bg-surface-container-lowest rounded-xl overflow-hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-outline-variant">
-                      <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Datum</th>
-                      <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Court</th>
-                      <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Kunde</th>
-                      <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Status</th>
-                      <th className="text-right text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Preis</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.bookings.slice(0, 10).map((b) => (
-                      <tr key={b.id} className="border-b border-outline-variant/30 last:border-0">
-                        <td className="p-4 text-sm">{formatDate(b.date)}</td>
-                        <td className="p-4 text-sm">{b.court.name}</td>
-                        <td className="p-4 text-sm">{b.customerName}</td>
-                        <td className="p-4"><StatusBadge status={b.status} /></td>
-                        <td className="p-4 text-sm text-right">{formatPrice(b.totalPrice)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </div>
           </div>
         )}
@@ -372,32 +525,65 @@ export default function AdminPage() {
 
         {/* Customers Tab */}
         {tab === "customers" && (
-          <div className="bg-surface-container-lowest rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-outline-variant">
-                  <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Name</th>
-                  <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">E-Mail</th>
-                  <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Telefon</th>
-                  <th className="text-right text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Buchungen</th>
-                  <th className="text-right text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Umsatz</th>
-                </tr>
-              </thead>
-              <tbody>
-                {uniqueCustomers.map((c) => (
-                  <tr key={c.email} className="border-b border-outline-variant/30 last:border-0">
-                    <td className="p-4 text-sm font-medium">{c.name}</td>
-                    <td className="p-4 text-sm text-on-surface-variant">{c.email}</td>
-                    <td className="p-4 text-sm text-on-surface-variant">{c.phone || "–"}</td>
-                    <td className="p-4 text-sm text-right">{c.bookings}</td>
-                    <td className="p-4 text-sm text-right font-medium">{formatPrice(c.totalSpent)}</td>
+          <div>
+            {/* Search */}
+            <div className="mb-6">
+              <div className="relative max-w-md">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">
+                  search
+                </span>
+                <input
+                  type="text"
+                  value={customerSearch}
+                  onChange={(e) => setCustomerSearch(e.target.value)}
+                  placeholder="Suche nach Name, E-Mail oder Telefon..."
+                  className="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-on-surface-variant/50"
+                />
+                {customerSearch && (
+                  <button
+                    onClick={() => setCustomerSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
+                  >
+                    <span className="material-symbols-outlined text-lg">close</span>
+                  </button>
+                )}
+              </div>
+              <p className="text-[10px] font-label tracking-widest uppercase text-on-surface-variant mt-2">
+                {uniqueCustomers.length} Kunde{uniqueCustomers.length !== 1 ? "n" : ""} gefunden
+              </p>
+            </div>
+
+            <div className="bg-surface-container-lowest rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-outline-variant">
+                    <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Name</th>
+                    <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">E-Mail</th>
+                    <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Telefon</th>
+                    <th className="text-right text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Buchungen</th>
+                    <th className="text-right text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Umsatz</th>
+                    <th className="text-right text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Letzte Buchung</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            {uniqueCustomers.length === 0 && (
-              <p className="text-on-surface-variant text-sm p-8 text-center">Noch keine Kunden</p>
-            )}
+                </thead>
+                <tbody>
+                  {uniqueCustomers.map((c) => (
+                    <tr key={c.email} className="border-b border-outline-variant/30 last:border-0 hover:bg-surface-container-low/50">
+                      <td className="p-4 text-sm font-medium">{c.name}</td>
+                      <td className="p-4 text-sm text-on-surface-variant">{c.email}</td>
+                      <td className="p-4 text-sm text-on-surface-variant">{c.phone || "–"}</td>
+                      <td className="p-4 text-sm text-right">{c.bookings}</td>
+                      <td className="p-4 text-sm text-right font-medium">{formatPrice(c.totalSpent)}</td>
+                      <td className="p-4 text-sm text-right text-on-surface-variant">{formatDate(c.lastBooking)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {uniqueCustomers.length === 0 && (
+                <p className="text-on-surface-variant text-sm p-8 text-center">
+                  {customerSearch ? "Keine Kunden gefunden" : "Noch keine Kunden"}
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>

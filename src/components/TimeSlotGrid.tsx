@@ -159,7 +159,7 @@ export default function TimeSlotGrid({
 
               {/* Time Slots */}
               <div className="px-4 pb-4">
-                <div className="grid grid-cols-8 gap-1.5">
+                <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
                   {TIME_SLOTS.map((hour) => {
                     const booked = isBooked(court.id, hour);
                     const past = isPast(hour);

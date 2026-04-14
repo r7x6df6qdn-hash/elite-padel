@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ELITE PADEL | The Editorial Athlete",
   description:
-    "Buche deinen Padel Court online. 4 Standard Courts und 2 Doppel Courts. Eine kuratierte Umgebung für moderne Padel-Exzellenz.",
+    "Buche deinen Padel Court online. 4 Doppel Courts und 2 Einzel Courts. Eine kuratierte Umgebung für moderne Padel-Exzellenz.",
 };
 
 export default function RootLayout({
@@ -88,7 +88,7 @@ export default function RootLayout({
                 <p className="text-stone-500 font-body text-sm font-light tracking-wide max-w-xs leading-relaxed">
                   Dein Premium Padel Center.
                   <br />
-                  4 Standard Courts &amp; 2 Doppel Courts.
+                  4 Doppel Courts &amp; 2 Einzel Courts.
                 </p>
                 <p className="text-stone-500 font-body text-sm font-light tracking-wide">
                   concierge@elitepadel.club

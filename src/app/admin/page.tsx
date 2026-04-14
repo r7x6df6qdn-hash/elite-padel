@@ -85,12 +85,20 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<"dashboard" | "bookings" | "customers" | "codes">("dashboard");
+  const [tab, setTab] = useState<"dashboard" | "bookings" | "customers" | "codes" | "blocks">("dashboard");
   const [filter, setFilter] = useState<"all" | "confirmed" | "pending" | "cancelled">("all");
   const [customerSearch, setCustomerSearch] = useState("");
   const [chartRange, setChartRange] = useState<"7" | "30">("7");
   const [courtDateFrom, setCourtDateFrom] = useState(getLocalDate());
   const [courtDateTo, setCourtDateTo] = useState(getLocalDate(daysFromNow(6)));
+  const [blocks, setBlocks] = useState<any[]>([]);
+  const [blockForm, setBlockForm] = useState({
+    courtId: "",
+    date: getLocalDate(),
+    startTime: 8,
+    endTime: 24,
+    reason: "",
+  });
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -129,6 +137,38 @@ export default function AdminPage() {
       body: JSON.stringify({ status }),
     });
     fetchDashboard();
+  };
+
+  const fetchBlocks = useCallback(async () => {
+    const from = getLocalDate();
+    const to = getLocalDate(daysFromNow(60));
+    const res = await fetch(`/api/admin/blocks?from=${from}&to=${to}`);
+    if (res.ok) setBlocks(await res.json());
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && tab === "blocks") fetchBlocks();
+  }, [isAuthenticated, tab, fetchBlocks]);
+
+  const handleCreateBlock = async () => {
+    if (!blockForm.courtId || !blockForm.date) return;
+    const res = await fetch("/api/admin/blocks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(blockForm),
+    });
+    if (res.ok) {
+      fetchBlocks();
+      setBlockForm((f) => ({ ...f, reason: "" }));
+    } else {
+      const data = await res.json();
+      alert(data.error || "Fehler beim Sperren");
+    }
+  };
+
+  const handleDeleteBlock = async (id: string) => {
+    await fetch(`/api/admin/blocks?id=${id}`, { method: "DELETE" });
+    fetchBlocks();
   };
 
   // Chart data — future bookings
@@ -274,7 +314,7 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="flex gap-1 bg-surface-container-high rounded-lg p-1 mb-8 w-fit">
-          {(["dashboard", "bookings", "customers", "codes"] as const).map((t) => (
+          {(["dashboard", "bookings", "customers", "codes", "blocks"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -284,7 +324,7 @@ export default function AdminPage() {
                   : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              {t === "dashboard" ? "Dashboard" : t === "bookings" ? "Buchungen" : t === "customers" ? "Kunden" : "Codes"}
+              {{ dashboard: "Dashboard", bookings: "Buchungen", customers: "Kunden", codes: "Codes", blocks: "Sperren" }[t]}
             </button>
           ))}
         </div>
@@ -658,6 +698,125 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Blocks Tab */}
+        {tab === "blocks" && (
+          <div>
+            {/* Create Block Form */}
+            <div className="bg-surface-container-lowest rounded-xl p-6 mb-8">
+              <h3 className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-4">
+                Court sperren
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                <div>
+                  <label className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant block mb-1">Court</label>
+                  <select
+                    value={blockForm.courtId}
+                    onChange={(e) => setBlockForm((f) => ({ ...f, courtId: e.target.value }))}
+                    className="w-full bg-surface-container-high text-on-surface text-sm px-3 py-2.5 rounded-lg border-none focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    <option value="">Auswählen...</option>
+                    {data.courts.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant block mb-1">Datum</label>
+                  <input
+                    type="date"
+                    value={blockForm.date}
+                    onChange={(e) => setBlockForm((f) => ({ ...f, date: e.target.value }))}
+                    className="w-full bg-surface-container-high text-on-surface text-sm px-3 py-2.5 rounded-lg border-none focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant block mb-1">Von</label>
+                  <select
+                    value={blockForm.startTime}
+                    onChange={(e) => setBlockForm((f) => ({ ...f, startTime: parseInt(e.target.value) }))}
+                    className="w-full bg-surface-container-high text-on-surface text-sm px-3 py-2.5 rounded-lg border-none focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    {Array.from({ length: 16 }, (_, i) => i + 8).map((h) => (
+                      <option key={h} value={h}>{h.toString().padStart(2, "0")}:00</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant block mb-1">Bis</label>
+                  <select
+                    value={blockForm.endTime}
+                    onChange={(e) => setBlockForm((f) => ({ ...f, endTime: parseInt(e.target.value) }))}
+                    className="w-full bg-surface-container-high text-on-surface text-sm px-3 py-2.5 rounded-lg border-none focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    {Array.from({ length: 16 }, (_, i) => i + 9).map((h) => (
+                      <option key={h} value={h}>{h.toString().padStart(2, "0")}:00</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant block mb-1">Grund</label>
+                  <input
+                    type="text"
+                    value={blockForm.reason}
+                    onChange={(e) => setBlockForm((f) => ({ ...f, reason: e.target.value }))}
+                    placeholder="z.B. Wartung, Privat..."
+                    className="w-full bg-surface-container-high text-on-surface text-sm px-3 py-2.5 rounded-lg border-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-on-surface-variant/50"
+                  />
+                </div>
+                <div>
+                  <button
+                    onClick={handleCreateBlock}
+                    disabled={!blockForm.courtId || blockForm.startTime >= blockForm.endTime}
+                    className="w-full bg-error text-on-error py-2.5 rounded-lg font-label text-[10px] tracking-widest uppercase hover:opacity-90 transition-opacity disabled:opacity-40"
+                  >
+                    Sperren
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Active Blocks */}
+            <div className="bg-surface-container-lowest rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-outline-variant">
+                    <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Datum</th>
+                    <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Court</th>
+                    <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Zeitraum</th>
+                    <th className="text-left text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Grund</th>
+                    <th className="text-right text-[10px] font-label uppercase tracking-widest text-on-surface-variant p-4">Aktion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {blocks.map((b: any) => (
+                    <tr key={b.id} className="border-b border-outline-variant/30 last:border-0">
+                      <td className="p-4 text-sm whitespace-nowrap">
+                        {new Date(b.date).toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" })}
+                      </td>
+                      <td className="p-4 text-sm">{b.court?.name}</td>
+                      <td className="p-4 font-mono text-sm">
+                        {b.startTime.toString().padStart(2, "0")}:00 – {b.endTime.toString().padStart(2, "0")}:00
+                      </td>
+                      <td className="p-4 text-sm text-on-surface-variant">{b.customerName}</td>
+                      <td className="p-4 text-right">
+                        <button
+                          onClick={() => handleDeleteBlock(b.id)}
+                          className="text-[10px] font-label tracking-widest uppercase text-error hover:underline"
+                        >
+                          Entsperren
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {blocks.length === 0 && (
+                <p className="text-on-surface-variant text-sm p-8 text-center">Keine aktiven Sperrungen</p>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Customers Tab */}
         {tab === "customers" && (
           <div>
@@ -744,11 +903,13 @@ function StatusBadge({ status }: { status: string }) {
     confirmed: "bg-secondary-container text-secondary",
     pending: "bg-tertiary-fixed text-tertiary",
     cancelled: "bg-error-container text-on-error-container",
+    blocked: "bg-stone-800 text-white",
   };
   const labels = {
     confirmed: "Bestätigt",
     pending: "Ausstehend",
     cancelled: "Storniert",
+    blocked: "Gesperrt",
   };
   return (
     <span className={`inline-block px-3 py-1 rounded text-[10px] font-label tracking-widest uppercase ${styles[status as keyof typeof styles] || ""}`}>

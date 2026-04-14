@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         where: {
           courtId,
           date: bookingDate,
-          status: { in: ["pending", "confirmed"] },
+          status: { in: ["pending", "confirmed", "blocked"] },
           OR: [
             { startTime: { lt: endTime }, endTime: { gt: startTime } },
           ],

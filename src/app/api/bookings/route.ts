@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
           lte: endOfDay,
         },
         status: {
-          in: ["pending", "confirmed"],
+          in: ["pending", "confirmed", "blocked"],
         },
       },
       select: {

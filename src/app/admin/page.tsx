@@ -23,6 +23,12 @@ type AccessCodeEntry = {
   code: string;
 };
 
+type Court = {
+  id: string;
+  name: string;
+  type: string;
+};
+
 type DashboardData = {
   stats: {
     totalBookings: number;
@@ -34,6 +40,7 @@ type DashboardData = {
   };
   bookings: Booking[];
   todaySchedule: Booking[];
+  courts: Court[];
   accessCodes: AccessCodeEntry[];
 };
 
@@ -82,6 +89,7 @@ export default function AdminPage() {
   const [filter, setFilter] = useState<"all" | "confirmed" | "pending" | "cancelled">("all");
   const [customerSearch, setCustomerSearch] = useState("");
   const [chartRange, setChartRange] = useState<"7" | "30">("7");
+  const [courtRange, setCourtRange] = useState<"1" | "7" | "14" | "30">("7");
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -367,42 +375,69 @@ export default function AdminPage() {
 
             {/* Court Breakdown */}
             <div className="bg-surface-container-lowest rounded-xl p-6">
-              <h3 className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-4">
-                Auslastung pro Court
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
+                  Auslastung pro Court
+                </h3>
+                <div className="flex gap-1 bg-surface-container-high rounded-lg p-1">
+                  {(["1", "7", "14", "30"] as const).map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => setCourtRange(r)}
+                      className={`px-3 py-1.5 rounded-md font-label text-[10px] tracking-widest uppercase transition-all ${
+                        courtRange === r
+                          ? "bg-surface-container-lowest text-on-surface shadow-sm"
+                          : "text-on-surface-variant hover:text-on-surface"
+                      }`}
+                    >
+                      {r === "1" ? "Heute" : `${r}T`}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="space-y-3">
                 {(() => {
-                  const days = parseInt(chartRange);
+                  const days = parseInt(courtRange);
                   const today = new Date();
                   today.setHours(0, 0, 0, 0);
                   const cutoff = daysFromNow(days);
-                  const confirmed = data.bookings.filter(
-                    (b) => b.status === "confirmed" && new Date(b.date) >= today && new Date(b.date) <= cutoff
-                  );
-                  const courts = Array.from(new Set(confirmed.map((b) => b.court.name)));
-                  const courtData = courts.map((name) => {
-                    const cb = confirmed.filter((b) => b.court.name === name);
-                    return { name, bookings: cb.length, revenue: cb.reduce((s, b) => s + b.totalPrice, 0) };
-                  }).sort((a, b) => b.revenue - a.revenue);
-                  const maxCourtRevenue = Math.max(...courtData.map((c) => c.revenue), 1);
+                  const slotsPerDay = 16; // 08:00–24:00
+                  const totalSlots = slotsPerDay * days;
 
-                  if (courtData.length === 0) {
-                    return <p className="text-on-surface-variant text-sm text-center py-4">Keine Daten für diesen Zeitraum</p>;
-                  }
+                  const confirmed = data.bookings.filter(
+                    (b) => b.status === "confirmed" && new Date(b.date) >= today && new Date(b.date) < cutoff
+                  );
+
+                  const courtData = data.courts.map((court) => {
+                    const cb = confirmed.filter((b) => b.courtId === court.id);
+                    const bookedSlots = cb.reduce((sum, b) => sum + (b.endTime - b.startTime), 0);
+                    const percent = Math.round((bookedSlots / totalSlots) * 100);
+                    return {
+                      name: court.name,
+                      bookings: cb.length,
+                      revenue: cb.reduce((s, b) => s + b.totalPrice, 0),
+                      percent,
+                      bookedSlots,
+                      totalSlots,
+                    };
+                  }).sort((a, b) => b.percent - a.percent);
 
                   return courtData.map((c) => (
                     <div key={c.name} className="flex items-center gap-4">
                       <span className="text-sm w-32 shrink-0">{c.name}</span>
-                      <div className="flex-1 bg-surface-container-high rounded-full h-6 overflow-hidden">
+                      <div className="flex-1 bg-surface-container-high rounded-full h-7 overflow-hidden">
                         <div
-                          className="h-full bg-primary/70 rounded-full flex items-center px-3"
-                          style={{ width: `${Math.max((c.revenue / maxCourtRevenue) * 100, 8)}%` }}
+                          className="h-full bg-primary/70 rounded-full flex items-center px-3 transition-all duration-300"
+                          style={{ width: `${Math.max(c.percent, 4)}%` }}
                         >
                           <span className="text-[10px] text-on-primary font-label whitespace-nowrap">
-                            {c.bookings}× · {formatPrice(c.revenue)}
+                            {c.percent}%
                           </span>
                         </div>
                       </div>
+                      <span className="text-[10px] text-on-surface-variant font-label w-28 text-right shrink-0">
+                        {c.bookings}× · {formatPrice(c.revenue)}
+                      </span>
                     </div>
                   ));
                 })()}

@@ -18,6 +18,11 @@ type Booking = {
   court: { name: string; type: string };
 };
 
+type AccessCodeEntry = {
+  date: string;
+  code: string;
+};
+
 type DashboardData = {
   stats: {
     totalBookings: number;
@@ -29,6 +34,7 @@ type DashboardData = {
   };
   bookings: Booking[];
   todaySchedule: Booking[];
+  accessCodes: AccessCodeEntry[];
 };
 
 function formatTime(hour: number) {
@@ -72,7 +78,7 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<"dashboard" | "bookings" | "customers">("dashboard");
+  const [tab, setTab] = useState<"dashboard" | "bookings" | "customers" | "codes">("dashboard");
   const [filter, setFilter] = useState<"all" | "confirmed" | "pending" | "cancelled">("all");
   const [customerSearch, setCustomerSearch] = useState("");
   const [chartRange, setChartRange] = useState<"7" | "30">("7");
@@ -259,7 +265,7 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="flex gap-1 bg-surface-container-high rounded-lg p-1 mb-8 w-fit">
-          {(["dashboard", "bookings", "customers"] as const).map((t) => (
+          {(["dashboard", "bookings", "customers", "codes"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -269,7 +275,7 @@ export default function AdminPage() {
                   : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              {t === "dashboard" ? "Dashboard" : t === "bookings" ? "Buchungen" : "Kunden"}
+              {t === "dashboard" ? "Dashboard" : t === "bookings" ? "Buchungen" : t === "customers" ? "Kunden" : "Codes"}
             </button>
           ))}
         </div>
@@ -519,6 +525,44 @@ export default function AdminPage() {
               {filteredBookings.length === 0 && (
                 <p className="text-on-surface-variant text-sm p-8 text-center">Keine Buchungen gefunden</p>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Codes Tab */}
+        {tab === "codes" && (
+          <div>
+            <p className="text-on-surface-variant text-sm mb-6">
+              Zugangscodes werden täglich automatisch generiert. Alle Kunden, die an einem bestimmten Tag gebucht haben, erhalten denselben Code.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {data.accessCodes.map((ac, i) => {
+                const d = new Date(ac.date + "T00:00:00");
+                const isToday = i === 0;
+                const dayName = d.toLocaleDateString("de-DE", { weekday: "short" });
+                const dateLabel = d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+
+                return (
+                  <div
+                    key={ac.date}
+                    className={`rounded-xl p-5 flex items-center justify-between ${
+                      isToday
+                        ? "bg-primary text-on-primary"
+                        : "bg-surface-container-lowest"
+                    }`}
+                  >
+                    <div>
+                      <p className={`text-[10px] font-label uppercase tracking-widest ${isToday ? "opacity-80" : "text-on-surface-variant"}`}>
+                        {dayName}, {dateLabel}
+                        {isToday && " · Heute"}
+                      </p>
+                    </div>
+                    <p className={`text-xl font-mono font-bold tracking-[0.15em] ${isToday ? "" : "text-on-surface"}`}>
+                      {ac.code}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

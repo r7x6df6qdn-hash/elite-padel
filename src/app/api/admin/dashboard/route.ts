@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getOrCreateDailyCode } from "@/lib/access-code";
 
 function isAdmin(request: NextRequest) {
   return request.cookies.get("admin_session")?.value === "authenticated";
@@ -18,7 +19,6 @@ export async function GET(request: NextRequest) {
     allBookings,
     todayBookings,
     monthBookings,
-    todayAccessCode,
     courts,
   ] = await Promise.all([
     prisma.booking.findMany({
@@ -40,11 +40,18 @@ export async function GET(request: NextRequest) {
         status: "confirmed",
       },
     }),
-    prisma.accessCode.findUnique({
-      where: { validDate: todayStart },
-    }),
     prisma.court.findMany(),
   ]);
+
+  // Generate access codes for next 30 days
+  const accessCodes: { date: string; code: string }[] = [];
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(todayStart);
+    d.setDate(d.getDate() + i);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const code = await getOrCreateDailyCode(dateStr);
+    accessCodes.push({ date: dateStr, code });
+  }
 
   const totalRevenue = allBookings
     .filter((b) => b.status === "confirmed")
@@ -63,10 +70,11 @@ export async function GET(request: NextRequest) {
       monthRevenue,
       totalRevenue,
       uniqueCustomers,
-      todayAccessCode: todayAccessCode?.code || "Noch nicht generiert",
+      todayAccessCode: accessCodes[0]?.code || "–",
     },
     bookings: allBookings,
     todaySchedule: todayBookings,
     courts,
+    accessCodes,
   });
 }

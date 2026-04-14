@@ -48,8 +48,13 @@ export default function TimeSlotGrid({
 
   const isPast = (hour: number) => {
     const now = new Date();
-    const today = now.toISOString().split("T")[0];
-    return selectedDate === today && hour <= now.getHours();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const today = `${year}-${month}-${day}`;
+    if (selectedDate < today) return true;
+    if (selectedDate === today) return hour <= now.getHours();
+    return false;
   };
 
   const isSelected = (courtId: string, hour: number) => {

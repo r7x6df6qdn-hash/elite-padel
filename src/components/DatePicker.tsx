@@ -18,7 +18,8 @@ export default function DatePicker({
     return date;
   });
 
-  const formatDateStr = (date: Date) => date.toISOString().split("T")[0];
+  const formatDateStr = (date: Date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
   const dayNames = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
   const monthNames = [

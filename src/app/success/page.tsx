@@ -63,34 +63,70 @@ function SuccessPageContent() {
 
         <p className="text-on-surface-variant font-light leading-relaxed mb-10 max-w-md mx-auto">
           Vielen Dank für deine Buchung. Du erhältst in Kürze eine
-          Bestätigungsmail mit deiner Rechnung via Easybill.
+          Bestätigungsmail mit deiner Rechnung und deinem Zugangscode.
         </p>
 
         {booking && (
-          <div className="bg-surface-container-low rounded-xl p-8 text-left space-y-4 mb-10">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
-                Buchungsnummer
-              </span>
-              <span className="font-mono font-medium text-xs">{booking.id}</span>
-            </div>
-            {booking.courtName && (
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
-                  Court
-                </span>
-                <span className="font-medium">{booking.courtName}</span>
+          <>
+            {/* Access Code Box */}
+            {booking.accessCode && (
+              <div className="bg-primary text-on-primary rounded-xl p-8 mb-8">
+                <p className="text-[10px] font-label uppercase tracking-[0.3em] opacity-80 mb-2">
+                  Zugangscode Halle
+                </p>
+                <p className="text-4xl font-headline tracking-[0.3em] font-bold">
+                  {booking.accessCode}
+                </p>
+                <p className="text-[10px] opacity-60 mt-3">
+                  Gültig am Buchungstag &bull; Bitte Code nicht weitergeben
+                </p>
               </div>
             )}
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
-                Status
-              </span>
-              <span className="text-secondary font-label text-[10px] tracking-widest uppercase bg-secondary-container px-3 py-1 rounded">
-                Confirmed
-              </span>
+
+            {/* Booking Details */}
+            <div className="bg-surface-container-low rounded-xl p-8 text-left space-y-4 mb-10">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
+                  Buchungsnummer
+                </span>
+                <span className="font-mono font-medium text-xs">{booking.id}</span>
+              </div>
+              {booking.courtName && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
+                    Court
+                  </span>
+                  <span className="font-medium">{booking.courtName}</span>
+                </div>
+              )}
+              {booking.timeSlot && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
+                    Zeitfenster
+                  </span>
+                  <span className="font-medium">{booking.timeSlot} Uhr</span>
+                </div>
+              )}
+              {booking.totalPrice && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
+                    Bezahlt
+                  </span>
+                  <span className="font-medium">
+                    {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(booking.totalPrice)}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
+                  Status
+                </span>
+                <span className="text-secondary font-label text-[10px] tracking-widest uppercase bg-secondary-container px-3 py-1 rounded">
+                  Bestätigt
+                </span>
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -98,13 +134,13 @@ function SuccessPageContent() {
             href="/booking"
             className="bg-primary text-on-primary px-10 py-4 rounded-lg font-label text-xs tracking-widest uppercase transition-all hover:opacity-90"
           >
-            Book Another Court
+            Weitere Buchung
           </a>
           <a
             href="/"
             className="bg-surface-container-high text-on-surface px-10 py-4 rounded-lg font-label text-xs tracking-widest uppercase transition-all hover:bg-surface-variant"
           >
-            Return Home
+            Zur Startseite
           </a>
         </div>
       </div>

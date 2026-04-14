@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { createInvoice, sendInvoiceByEmail } from "@/lib/easybill";
+import { sendBookingConfirmation } from "@/lib/email";
+import { getOrCreateDailyCode } from "@/lib/access-code";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -35,15 +37,40 @@ export async function POST(request: NextRequest) {
     const bookingId = session.metadata?.bookingId;
 
     if (bookingId) {
-      // Update booking to confirmed
+      // Get or generate daily access code
+      const bookingDate = session.metadata?.date || "";
+      const accessCode = await getOrCreateDailyCode(bookingDate);
+
+      // Update booking to confirmed with access code
       const booking = await prisma.booking.update({
         where: { id: bookingId },
         data: {
           status: "confirmed",
           stripePaymentId: session.payment_intent as string,
+          stripeSessionId: session.id,
+          accessCode,
         },
         include: { court: true },
       });
+
+      // Send booking confirmation email with access code
+      try {
+        await sendBookingConfirmation({
+          customerName: booking.customerName,
+          customerEmail: booking.customerEmail,
+          courtName: booking.court.name,
+          courtType: booking.court.type,
+          date: bookingDate,
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          totalPrice: booking.totalPrice,
+          bookingId: booking.id,
+          accessCode,
+        });
+        console.log(`Confirmation email sent for booking ${bookingId}`);
+      } catch (emailError) {
+        console.error("Failed to send confirmation email:", emailError);
+      }
 
       // Create Easybill invoice
       try {
@@ -51,27 +78,21 @@ export async function POST(request: NextRequest) {
           customerName: booking.customerName,
           customerEmail: booking.customerEmail,
           courtName: booking.court.name,
-          date: booking.date.toISOString().split("T")[0],
+          date: bookingDate,
           startTime: booking.startTime,
           endTime: booking.endTime,
           totalPrice: booking.totalPrice,
         });
 
-        // Update booking with invoice ID
         await prisma.booking.update({
           where: { id: bookingId },
           data: { easybillInvoiceId: invoice.id.toString() },
         });
 
-        // Send invoice by email
         await sendInvoiceByEmail(invoice.id);
-
-        console.log(
-          `Invoice ${invoice.id} created and sent for booking ${bookingId}`
-        );
+        console.log(`Invoice ${invoice.id} created and sent for booking ${bookingId}`);
       } catch (invoiceError) {
         console.error("Failed to create Easybill invoice:", invoiceError);
-        // Don't fail the webhook - booking is still confirmed
       }
     }
   }
@@ -81,7 +102,6 @@ export async function POST(request: NextRequest) {
     const bookingId = session.metadata?.bookingId;
 
     if (bookingId) {
-      // Cancel the pending booking
       await prisma.booking.update({
         where: { id: bookingId },
         data: { status: "cancelled" },

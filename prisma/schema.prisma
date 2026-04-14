@@ -3,14 +3,14 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Court {
   id          String    @id @default(cuid())
   name        String
-  type        String    // "standard" (4er) or "double" (Doppel)
+  type        String    // "standard" (Einzel) or "double" (Doppel)
   pricePerHour Float
   description String?
   bookings    Booking[]
@@ -31,7 +31,18 @@ model Booking {
   totalPrice      Float
   status          String   @default("pending") // pending, confirmed, cancelled
   stripePaymentId String?
+  stripeSessionId String?
   easybillInvoiceId String?
+  accessCode      String?  // Daily hall access code
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model AccessCode {
+  id        String   @id @default(cuid())
+  code      String   // 6-digit code
+  validDate DateTime // The date this code is valid for
+  createdAt DateTime @default(now())
+
+  @@unique([validDate])
 }

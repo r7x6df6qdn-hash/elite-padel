@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
-import { OPENING_HOUR, CLOSING_HOUR } from "@/lib/constants";
+import { OPENING_HOUR, CLOSING_HOUR, calculateTotalPrice } from "@/lib/constants";
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,9 +50,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify price
+    // Verify price using time-based pricing
     const hours = endTime - startTime;
-    const expectedPrice = hours * court.pricePerHour;
+    const expectedPrice = calculateTotalPrice(court.type, startTime, endTime);
     if (Math.abs(totalPrice - expectedPrice) > 0.01) {
       return NextResponse.json(
         { error: "Preisabweichung erkannt." },

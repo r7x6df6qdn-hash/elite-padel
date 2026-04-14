@@ -90,7 +90,7 @@ export default function AdminPage() {
   const [customerSearch, setCustomerSearch] = useState("");
   const [chartRange, setChartRange] = useState<"7" | "30">("7");
   const [courtDateFrom, setCourtDateFrom] = useState(getLocalDate());
-  const [courtDateTo, setCourtDateTo] = useState(getLocalDate(daysFromNow(7)));
+  const [courtDateTo, setCourtDateTo] = useState(getLocalDate(daysFromNow(6)));
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -414,12 +414,13 @@ export default function AdminPage() {
               </div>
               {(() => {
                 const from = new Date(courtDateFrom + "T00:00:00");
-                const to = new Date(courtDateTo + "T23:59:59");
+                const to = new Date(courtDateTo + "T00:00:00");
                 const days = Math.max(1, Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1);
                 const slotsPerDay = 16; // 08:00–24:00
 
+                const toEnd = new Date(courtDateTo + "T23:59:59");
                 const confirmed = data.bookings.filter(
-                  (b) => b.status === "confirmed" && new Date(b.date) >= from && new Date(b.date) <= to
+                  (b) => b.status === "confirmed" && new Date(b.date) >= from && new Date(b.date) <= toEnd
                 );
 
                 const courtData = data.courts.map((court) => {

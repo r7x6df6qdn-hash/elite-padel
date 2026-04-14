@@ -317,18 +317,18 @@ export default function AdminPage() {
                     Letzte {chartRange} Tage
                   </span>
                 </div>
-                <div className="flex items-end gap-1 h-40">
+                <div className="flex items-end gap-1" style={{ height: "160px" }}>
                   {chartData.revenue.map((val, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                    <div key={i} className="flex-1 flex flex-col items-end justify-end h-full group relative">
                       <div className="absolute -top-8 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                         {chartData.labels[i]}: {formatPrice(val)}
                       </div>
                       <div
-                        className="w-full bg-primary/80 rounded-t hover:bg-primary transition-colors min-h-[2px]"
-                        style={{ height: `${Math.max((val / maxRevenue) * 100, 1.5)}%` }}
+                        className="w-full bg-primary/80 rounded-t hover:bg-primary transition-colors"
+                        style={{ height: `${Math.max((val / maxRevenue) * 100, 1.5)}%`, minHeight: "2px" }}
                       />
                       {chartRange === "7" && (
-                        <span className="text-[9px] text-on-surface-variant">{chartData.labels[i]}</span>
+                        <span className="text-[9px] text-on-surface-variant mt-1">{chartData.labels[i]}</span>
                       )}
                     </div>
                   ))}
@@ -346,18 +346,18 @@ export default function AdminPage() {
                     Letzte {chartRange} Tage
                   </span>
                 </div>
-                <div className="flex items-end gap-1 h-40">
+                <div className="flex items-end gap-1" style={{ height: "160px" }}>
                   {chartData.bookings.map((val, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                    <div key={i} className="flex-1 flex flex-col items-end justify-end h-full group relative">
                       <div className="absolute -top-8 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                         {chartData.labels[i]}: {val} Buchung{val !== 1 ? "en" : ""}
                       </div>
                       <div
-                        className="w-full bg-secondary/80 rounded-t hover:bg-secondary transition-colors min-h-[2px]"
-                        style={{ height: `${Math.max((val / maxBookings) * 100, 1.5)}%` }}
+                        className="w-full bg-secondary/80 rounded-t hover:bg-secondary transition-colors"
+                        style={{ height: `${Math.max((val / maxBookings) * 100, 1.5)}%`, minHeight: "2px" }}
                       />
                       {chartRange === "7" && (
-                        <span className="text-[9px] text-on-surface-variant">{chartData.labels[i]}</span>
+                        <span className="text-[9px] text-on-surface-variant mt-1">{chartData.labels[i]}</span>
                       )}
                     </div>
                   ))}

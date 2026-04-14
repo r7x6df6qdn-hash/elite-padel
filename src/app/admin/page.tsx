@@ -66,9 +66,9 @@ function getLocalDate(d: Date = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function daysAgo(n: number) {
+function daysFromNow(n: number) {
   const d = new Date();
-  d.setDate(d.getDate() - n);
+  d.setDate(d.getDate() + n);
   return d;
 }
 
@@ -122,7 +122,7 @@ export default function AdminPage() {
     fetchDashboard();
   };
 
-  // Chart data
+  // Chart data — future bookings
   const chartData = useMemo(() => {
     if (!data) return { labels: [], revenue: [], bookings: [] };
     const days = parseInt(chartRange);
@@ -132,14 +132,14 @@ export default function AdminPage() {
     const revenue: number[] = [];
     const bookingCounts: number[] = [];
 
-    for (let i = days - 1; i >= 0; i--) {
-      const d = daysAgo(i);
+    for (let i = 0; i < days; i++) {
+      const d = daysFromNow(i);
       const dateStr = getLocalDate(d);
       const dayBookings = confirmed.filter((b) => {
         const bDate = new Date(b.date);
         return getLocalDate(bDate) === dateStr;
       });
-      labels.push(d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }));
+      labels.push(i === 0 ? "Heute" : d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" }));
       revenue.push(dayBookings.reduce((sum, b) => sum + b.totalPrice, 0));
       bookingCounts.push(dayBookings.length);
     }
@@ -286,7 +286,7 @@ export default function AdminPage() {
             {/* Chart Range Toggle */}
             <div className="flex items-center justify-between">
               <h2 className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
-                Umsatz & Buchungen
+                Kommende Buchungen & Umsatz
               </h2>
               <div className="flex gap-1 bg-surface-container-high rounded-lg p-1">
                 {(["7", "30"] as const).map((r) => (
@@ -314,7 +314,7 @@ export default function AdminPage() {
                     <p className="text-2xl font-headline font-bold text-on-surface mt-1">{formatPrice(totalChartRevenue)}</p>
                   </div>
                   <span className="text-[10px] font-label tracking-widest uppercase text-on-surface-variant">
-                    Letzte {chartRange} Tage
+                    Nächste {chartRange} Tage
                   </span>
                 </div>
                 <div className="flex items-end gap-1" style={{ height: "160px" }}>
@@ -343,7 +343,7 @@ export default function AdminPage() {
                     <p className="text-2xl font-headline font-bold text-on-surface mt-1">{totalChartBookings}</p>
                   </div>
                   <span className="text-[10px] font-label tracking-widest uppercase text-on-surface-variant">
-                    Letzte {chartRange} Tage
+                    Nächste {chartRange} Tage
                   </span>
                 </div>
                 <div className="flex items-end gap-1" style={{ height: "160px" }}>
@@ -373,9 +373,11 @@ export default function AdminPage() {
               <div className="space-y-3">
                 {(() => {
                   const days = parseInt(chartRange);
-                  const cutoff = daysAgo(days);
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const cutoff = daysFromNow(days);
                   const confirmed = data.bookings.filter(
-                    (b) => b.status === "confirmed" && new Date(b.date) >= cutoff
+                    (b) => b.status === "confirmed" && new Date(b.date) >= today && new Date(b.date) <= cutoff
                   );
                   const courts = Array.from(new Set(confirmed.map((b) => b.court.name)));
                   const courtData = courts.map((name) => {

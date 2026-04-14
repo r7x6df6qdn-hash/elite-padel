@@ -127,9 +127,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
-    console.error("Checkout error:", error);
+    console.error("Checkout error:", error?.message, error?.type, error?.statusCode);
     return NextResponse.json(
-      { error: "Interner Fehler. Bitte versuche es erneut." },
+      { error: "Interner Fehler. Bitte versuche es erneut.", details: error?.message },
       { status: 500 }
     );
   }

@@ -1,35 +1,29 @@
 "use client";
 
-import { formatTime, formatPrice, COURT_TYPES, calculateTotalPrice, getPriceForHour, PEAK_HOUR } from "@/lib/constants";
+import { formatTime, formatPrice, COURT_TYPES, calculateTotalPrice } from "@/lib/constants";
+import type { Selection } from "@/components/TimeSlotGrid";
 
 interface BookingSummaryProps {
-  court: {
-    id: string;
-    name: string;
-    type: string;
-    pricePerHour: number;
-  } | null;
+  selections: Selection[];
   date: string;
-  startTime: number | null;
-  endTime: number | null;
+  onRemoveSelection: (courtId: string) => void;
   onProceedToCheckout: () => void;
 }
 
 export default function BookingSummary({
-  court,
+  selections,
   date,
-  startTime,
-  endTime,
+  onRemoveSelection,
   onProceedToCheckout,
 }: BookingSummaryProps) {
-  if (!court || startTime === null || endTime === null) {
+  if (selections.length === 0) {
     return (
       <div className="bg-surface-container-highest rounded-xl p-10 editorial-shadow border border-white/20">
         <h3 className="text-3xl font-headline italic tracking-tight mb-6">
           Secure Court
         </h3>
         <p className="text-on-surface-variant font-light text-sm">
-          Wähle einen Court und Zeitslot aus, um fortzufahren.
+          Wähle Courts und Zeitslots aus, um fortzufahren.
         </p>
         <div className="mt-8 bg-white/50 rounded-lg p-8 border border-white text-center">
           <span className="material-symbols-outlined text-4xl text-stone-300">
@@ -43,10 +37,6 @@ export default function BookingSummary({
     );
   }
 
-  const hours = endTime - startTime;
-  const totalPrice = calculateTotalPrice(court.type, startTime, endTime);
-  const typeInfo = COURT_TYPES[court.type as keyof typeof COURT_TYPES];
-
   const dateObj = new Date(date + "T00:00:00");
   const formattedDate = dateObj.toLocaleDateString("de-DE", {
     weekday: "long",
@@ -55,44 +45,60 @@ export default function BookingSummary({
     day: "numeric",
   });
 
+  const totalPrice = selections.reduce(
+    (sum, s) => sum + calculateTotalPrice(s.courtType, s.startTime, s.endTime),
+    0
+  );
+
   return (
     <div className="bg-surface-container-highest rounded-xl p-10 editorial-shadow border border-white/20">
-      <h3 className="text-3xl font-headline italic tracking-tight mb-10">
-        Secure Court
+      <h3 className="text-3xl font-headline italic tracking-tight mb-6">
+        Secure Court{selections.length > 1 ? "s" : ""}
       </h3>
 
-      <div className="space-y-6 mb-8">
-        <div>
-          <label className="block text-[10px] font-label uppercase tracking-widest text-stone-500 mb-1">
-            Court
-          </label>
-          <p className="font-body font-medium">{court.name}</p>
-          <p className="text-[10px] font-label tracking-widest uppercase text-on-surface-variant">
-            {typeInfo?.label}
-          </p>
-        </div>
+      <div className="mb-4">
+        <label className="block text-[10px] font-label uppercase tracking-widest text-stone-500 mb-1">
+          Datum
+        </label>
+        <p className="font-body font-medium">{formattedDate}</p>
+      </div>
 
-        <div>
-          <label className="block text-[10px] font-label uppercase tracking-widest text-stone-500 mb-1">
-            Datum
-          </label>
-          <p className="font-body font-medium">{formattedDate}</p>
-        </div>
+      <div className="space-y-4 mb-8">
+        {selections.map((sel) => {
+          const hours = sel.endTime - sel.startTime;
+          const price = calculateTotalPrice(sel.courtType, sel.startTime, sel.endTime);
+          const typeInfo = COURT_TYPES[sel.courtType as keyof typeof COURT_TYPES];
 
-        <div>
-          <label className="block text-[10px] font-label uppercase tracking-widest text-stone-500 mb-1">
-            Zeitfenster
-          </label>
-          <p className="font-body font-medium">
-            {formatTime(startTime)} &ndash; {formatTime(endTime)} ({hours}h)
-          </p>
-        </div>
+          return (
+            <div key={sel.courtId} className="bg-white/50 rounded-lg p-4 border border-white relative">
+              <button
+                onClick={() => onRemoveSelection(sel.courtId)}
+                className="absolute top-3 right-3 text-stone-400 hover:text-error transition-colors"
+                title="Entfernen"
+              >
+                <span className="material-symbols-outlined text-base">close</span>
+              </button>
+              <div className="mb-2">
+                <p className="font-body font-medium">{sel.courtName}</p>
+                <p className="text-[10px] font-label tracking-widest uppercase text-on-surface-variant">
+                  {typeInfo?.label}
+                </p>
+              </div>
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm text-on-surface-variant font-light">
+                  {formatTime(sel.startTime)} – {formatTime(sel.endTime)} ({hours}h)
+                </span>
+                <span className="font-body font-bold text-sm">{formatPrice(price)}</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="bg-white/50 rounded-lg p-5 space-y-3 border border-white">
         <div className="flex justify-between items-baseline text-sm font-light gap-2">
           <span className="text-on-surface-variant whitespace-nowrap">
-            Court Rental ({hours}h)
+            {selections.length} Court{selections.length > 1 ? "s" : ""}
           </span>
           <span className="font-body font-bold whitespace-nowrap">{formatPrice(totalPrice)}</span>
         </div>

@@ -18,20 +18,33 @@ export async function GET(request: NextRequest) {
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    if (session.payment_status === "paid" && session.metadata?.bookingId) {
-      // Find booking (may already be confirmed by webhook)
+    if (session.payment_status !== "paid") {
+      return NextResponse.json({ error: "Payment not completed" }, { status: 400 });
+    }
+
+    // Support both single bookingId and multiple bookingIds
+    const bookingIds = session.metadata?.bookingIds
+      ? session.metadata.bookingIds.split(",")
+      : session.metadata?.bookingId
+      ? [session.metadata.bookingId]
+      : [];
+
+    if (bookingIds.length === 0) {
+      return NextResponse.json({ error: "No booking IDs found" }, { status: 404 });
+    }
+
+    const bookingDate = session.metadata?.date || "";
+    const results = [];
+
+    for (const bookingId of bookingIds) {
       let booking = await prisma.booking.findUnique({
-        where: { id: session.metadata.bookingId },
+        where: { id: bookingId },
         include: { court: true },
       });
 
-      if (!booking) {
-        return NextResponse.json({ error: "Booking not found" }, { status: 404 });
-      }
+      if (!booking) continue;
 
-      const bookingDate = session.metadata.date || "";
-
-      // If not yet confirmed (webhook hasn't fired yet), confirm it and handle everything
+      // If not yet confirmed, confirm it
       if (booking.status === "pending" || !booking.accessCode) {
         const accessCode = booking.accessCode || await getOrCreateDailyCode(bookingDate);
 
@@ -61,14 +74,13 @@ export async function GET(request: NextRequest) {
               bookingId: booking.id,
               accessCode,
             });
-            console.log(`Confirmation email sent via confirm endpoint for booking ${booking.id}`);
           } catch (emailError) {
             console.error("Failed to send confirmation email:", emailError);
           }
         }
       }
 
-      return NextResponse.json({
+      results.push({
         id: booking.id,
         courtName: booking.court.name,
         courtType: booking.court.type,
@@ -82,7 +94,11 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ error: "Payment not completed" }, { status: 400 });
+    // Return array for multi-booking, but also keep backwards compat
+    if (results.length === 1) {
+      return NextResponse.json(results[0]);
+    }
+    return NextResponse.json({ bookings: results });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },

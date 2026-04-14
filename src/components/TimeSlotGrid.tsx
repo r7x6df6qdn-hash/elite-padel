@@ -3,6 +3,14 @@
 import { useState } from "react";
 import { TIME_SLOTS, formatTime, formatPrice, getPriceForHour } from "@/lib/constants";
 
+export interface Selection {
+  courtId: string;
+  courtName: string;
+  courtType: string;
+  startTime: number;
+  endTime: number;
+}
+
 interface TimeSlotGridProps {
   courts: Array<{
     id: string;
@@ -16,9 +24,7 @@ interface TimeSlotGridProps {
     endTime: number;
   }>;
   selectedDate: string;
-  selectedCourt: string | null;
-  selectedStart: number | null;
-  selectedEnd: number | null;
+  selections: Selection[];
   onSlotSelect: (courtId: string, hour: number) => void;
 }
 
@@ -26,9 +32,7 @@ export default function TimeSlotGrid({
   courts,
   bookedSlots,
   selectedDate,
-  selectedCourt,
-  selectedStart,
-  selectedEnd,
+  selections,
   onSlotSelect,
 }: TimeSlotGridProps) {
   const doppelCourts = courts.filter((c) => c.type === "double");
@@ -58,10 +62,13 @@ export default function TimeSlotGrid({
   };
 
   const isSelected = (courtId: string, hour: number) => {
-    if (!selectedCourt || selectedCourt !== courtId) return false;
-    if (selectedStart === null) return false;
-    if (selectedEnd === null) return hour === selectedStart;
-    return hour >= selectedStart && hour < selectedEnd;
+    const sel = selections.find((s) => s.courtId === courtId);
+    if (!sel) return false;
+    return hour >= sel.startTime && hour < sel.endTime;
+  };
+
+  const getCourtSelection = (courtId: string) => {
+    return selections.find((s) => s.courtId === courtId);
   };
 
   return (
@@ -73,7 +80,7 @@ export default function TimeSlotGrid({
             Verfügbarkeit
           </h2>
           <p className="text-on-surface-variant font-light text-sm">
-            Wähle einen Court und klicke auf die gewünschte Uhrzeit.
+            Wähle Courts und Zeitslots aus. Du kannst mehrere Courts gleichzeitig buchen.
           </p>
         </div>
         <div className="flex gap-3">
@@ -131,13 +138,13 @@ export default function TimeSlotGrid({
       {/* Court Cards with Time Slots */}
       <div className="space-y-4">
         {activeCourts.map((court) => {
-          const isCourtSelected = selectedCourt === court.id;
+          const courtSel = getCourtSelection(court.id);
 
           return (
             <div
               key={court.id}
               className={`rounded-xl border-2 transition-all ${
-                isCourtSelected
+                courtSel
                   ? "border-primary bg-primary/[0.03]"
                   : "border-transparent bg-surface-container-low"
               }`}
@@ -155,9 +162,9 @@ export default function TimeSlotGrid({
                     </p>
                   </div>
                 </div>
-                {isCourtSelected && selectedStart !== null && selectedEnd !== null && (
+                {courtSel && (
                   <div className="bg-primary text-on-primary px-4 py-1.5 rounded-full text-xs font-label tracking-wider uppercase">
-                    {formatTime(selectedStart)} – {formatTime(selectedEnd)}
+                    {formatTime(courtSel.startTime)} – {formatTime(courtSel.endTime)}
                   </div>
                 )}
               </div>
@@ -187,7 +194,7 @@ export default function TimeSlotGrid({
                             : "bg-white hover:bg-primary-container/50 hover:shadow-sm cursor-pointer text-on-surface"
                         }`}
                       >
-                        <span className={`text-sm font-body font-medium ${selected ? "" : past || booked ? "" : ""}`}>
+                        <span className="text-sm font-body font-medium">
                           {formatTime(hour)}
                         </span>
                         <span className={`text-[10px] font-label mt-0.5 ${

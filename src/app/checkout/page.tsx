@@ -1,8 +1,22 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { formatTime, formatPrice, COURT_TYPES, calculateTotalPrice, getPriceForHour, PEAK_HOUR } from "@/lib/constants";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter } from "next/navigation";
+import { formatTime, formatPrice, COURT_TYPES, calculateTotalPrice, getPriceForHour } from "@/lib/constants";
+
+interface CheckoutItem {
+  courtId: string;
+  courtName: string;
+  courtType: string;
+  startTime: number;
+  endTime: number;
+  totalPrice: number;
+}
+
+interface CheckoutData {
+  date: string;
+  items: CheckoutItem[];
+}
 
 export default function CheckoutPage() {
   return (
@@ -13,25 +27,46 @@ export default function CheckoutPage() {
 }
 
 function CheckoutPageContent() {
-  const searchParams = useSearchParams();
   const router = useRouter();
-
-  const courtId = searchParams.get("courtId") || "";
-  const courtName = searchParams.get("courtName") || "";
-  const courtType = searchParams.get("courtType") || "";
-  const date = searchParams.get("date") || "";
-  const startTime = parseInt(searchParams.get("startTime") || "0");
-  const endTime = parseInt(searchParams.get("endTime") || "0");
-  const totalPrice = parseFloat(searchParams.get("totalPrice") || "0");
-
+  const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const typeInfo = COURT_TYPES[courtType as keyof typeof COURT_TYPES];
-  const hours = endTime - startTime;
+  useEffect(() => {
+    const stored = sessionStorage.getItem("checkoutData");
+    if (stored) {
+      try {
+        setCheckoutData(JSON.parse(stored));
+      } catch {
+        setCheckoutData(null);
+      }
+    }
+  }, []);
+
+  if (!checkoutData || checkoutData.items.length === 0) {
+    return (
+      <div className="pt-40 pb-24 max-w-2xl mx-auto px-6 text-center">
+        <span className="material-symbols-outlined text-6xl text-stone-300 mb-6">
+          event_busy
+        </span>
+        <h1 className="text-3xl font-headline italic text-on-surface mb-4">
+          Keine Buchungsdaten
+        </h1>
+        <p className="text-on-surface-variant font-light mb-8">
+          Bitte wähle zuerst einen Court und Zeitslot aus.
+        </p>
+        <a href="/booking" className="btn-primary inline-block">
+          Zur Buchung
+        </a>
+      </div>
+    );
+  }
+
+  const { date, items } = checkoutData;
+  const totalPrice = items.reduce((sum, item) => sum + item.totalPrice, 0);
 
   const dateObj = new Date(date + "T00:00:00");
   const formattedDate = dateObj.toLocaleDateString("de-DE", {
@@ -51,13 +86,8 @@ function CheckoutPageContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          courtId,
-          courtName,
-          courtType,
           date,
-          startTime,
-          endTime,
-          totalPrice,
+          items,
           customerName,
           customerEmail,
           customerPhone,
@@ -71,6 +101,7 @@ function CheckoutPageContent() {
       }
 
       if (data.url) {
+        sessionStorage.removeItem("checkoutData");
         window.location.href = data.url;
       }
     } catch (err: any) {
@@ -79,25 +110,6 @@ function CheckoutPageContent() {
       setLoading(false);
     }
   };
-
-  if (!courtId || !date) {
-    return (
-      <div className="pt-40 pb-24 max-w-2xl mx-auto px-6 text-center">
-        <span className="material-symbols-outlined text-6xl text-stone-300 mb-6">
-          event_busy
-        </span>
-        <h1 className="text-3xl font-headline italic text-on-surface mb-4">
-          Keine Buchungsdaten
-        </h1>
-        <p className="text-on-surface-variant font-light mb-8">
-          Bitte wähle zuerst einen Court und Zeitslot aus.
-        </p>
-        <a href="/booking" className="btn-primary inline-block">
-          Zur Buchung
-        </a>
-      </div>
-    );
-  }
 
   return (
     <div className="pt-32 pb-24 max-w-screen-2xl mx-auto px-6 md:px-12">
@@ -198,57 +210,53 @@ function CheckoutPageContent() {
               Reservation Summary
             </h3>
 
-            <div className="space-y-6 mb-8">
-              <div className="flex justify-between items-start">
-                <div>
-                  <label className="block text-[10px] font-label uppercase tracking-widest text-stone-500 mb-1">
-                    Court
-                  </label>
-                  <p className="font-body font-medium">{courtName}</p>
-                </div>
-                <span className="text-[10px] font-label tracking-widest uppercase text-primary bg-primary-fixed px-3 py-1 rounded">
-                  {typeInfo?.label}
-                </span>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-label uppercase tracking-widest text-stone-500 mb-1">
-                  Datum
-                </label>
-                <p className="font-body font-medium">{formattedDate}</p>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-label uppercase tracking-widest text-stone-500 mb-1">
-                  Zeitfenster
-                </label>
-                <p className="font-body font-medium">
-                  {formatTime(startTime)} &ndash; {formatTime(endTime)} ({hours}
-                  h)
-                </p>
-              </div>
+            <div className="mb-6">
+              <label className="block text-[10px] font-label uppercase tracking-widest text-stone-500 mb-1">
+                Datum
+              </label>
+              <p className="font-body font-medium">{formattedDate}</p>
             </div>
 
-            <div className="bg-white/50 rounded-lg p-8 space-y-4 border border-white">
-              {Array.from({ length: hours }, (_, i) => startTime + i).map((hour) => (
-                <div key={hour} className="flex justify-between text-sm font-light">
-                  <span className="text-on-surface-variant">
-                    {formatTime(hour)} – {formatTime(hour + 1)}
-                  </span>
-                  <span className="font-body font-bold">
-                    {formatPrice(getPriceForHour(courtType, hour))}
-                  </span>
-                </div>
-              ))}
-              <div className="flex justify-between text-sm font-light pt-2 border-t border-stone-100">
-                <span className="text-on-surface-variant">
-                  inkl. MwSt. (19%)
-                </span>
-                <span className="font-body font-bold">
-                  {formatPrice(totalPrice * 0.19)}
-                </span>
+            <div className="space-y-4 mb-8">
+              {items.map((item) => {
+                const hours = item.endTime - item.startTime;
+                const typeInfo = COURT_TYPES[item.courtType as keyof typeof COURT_TYPES];
+
+                return (
+                  <div key={item.courtId} className="bg-white/50 rounded-lg p-5 border border-white space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-body font-medium">{item.courtName}</p>
+                        <p className="text-[10px] font-label tracking-widest uppercase text-on-surface-variant">
+                          {typeInfo?.label}
+                        </p>
+                      </div>
+                      <span className="font-body font-bold">{formatPrice(item.totalPrice)}</span>
+                    </div>
+                    <div className="text-sm text-on-surface-variant font-light">
+                      {formatTime(item.startTime)} – {formatTime(item.endTime)} ({hours}h)
+                    </div>
+                    {Array.from({ length: hours }, (_, i) => item.startTime + i).map((hour) => (
+                      <div key={hour} className="flex justify-between text-xs font-light">
+                        <span className="text-on-surface-variant">
+                          {formatTime(hour)} – {formatTime(hour + 1)}
+                        </span>
+                        <span className="font-body font-bold">
+                          {formatPrice(getPriceForHour(item.courtType, hour))}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="bg-white/50 rounded-lg p-5 space-y-3 border border-white">
+              <div className="flex justify-between text-sm font-light">
+                <span className="text-on-surface-variant">inkl. MwSt. (19%)</span>
+                <span className="font-body font-bold">{formatPrice(totalPrice * 0.19)}</span>
               </div>
-              <div className="pt-6 border-t border-stone-200 flex justify-between items-center">
+              <div className="pt-4 border-t border-stone-200 flex justify-between items-center">
                 <span className="font-headline italic text-xl">Investment</span>
                 <span className="text-3xl font-headline italic text-primary">
                   {formatPrice(totalPrice)}

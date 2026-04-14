@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import DatePicker from "@/components/DatePicker";
-import TimeSlotGrid from "@/components/TimeSlotGrid";
+import TimeSlotGrid, { type Selection } from "@/components/TimeSlotGrid";
 import BookingSummary from "@/components/BookingSummary";
 import { useRouter, useSearchParams } from "next/navigation";
 import { calculateTotalPrice } from "@/lib/constants";
@@ -39,11 +39,7 @@ function BookingPageContent() {
   const [selectedDate, setSelectedDate] = useState(today);
   const [courts, setCourts] = useState<Court[]>([]);
   const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
-  const [selectedCourt, setSelectedCourt] = useState<string | null>(
-    preselectedCourt
-  );
-  const [selectedStart, setSelectedStart] = useState<number | null>(null);
-  const [selectedEnd, setSelectedEnd] = useState<number | null>(null);
+  const [selections, setSelections] = useState<Selection[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -74,41 +70,65 @@ function BookingPageContent() {
   }, [fetchData]);
 
   const handleSlotSelect = (courtId: string, hour: number) => {
-    if (selectedCourt !== courtId) {
-      setSelectedCourt(courtId);
-      setSelectedStart(hour);
-      setSelectedEnd(hour + 1);
-    } else if (selectedStart === null) {
-      setSelectedStart(hour);
-      setSelectedEnd(hour + 1);
-    } else if (selectedEnd !== null && hour === selectedEnd) {
-      setSelectedEnd(hour + 1);
-    } else if (hour === selectedStart && selectedEnd === selectedStart + 1) {
-      setSelectedStart(null);
-      setSelectedEnd(null);
-    } else {
-      setSelectedStart(hour);
-      setSelectedEnd(hour + 1);
-    }
+    const court = courts.find((c) => c.id === courtId);
+    if (!court) return;
+
+    setSelections((prev) => {
+      const existing = prev.find((s) => s.courtId === courtId);
+
+      if (!existing) {
+        // New court — add selection
+        return [...prev, {
+          courtId,
+          courtName: court.name,
+          courtType: court.type,
+          startTime: hour,
+          endTime: hour + 1,
+        }];
+      }
+
+      // Extend range if clicking the next hour
+      if (hour === existing.endTime) {
+        return prev.map((s) =>
+          s.courtId === courtId ? { ...s, endTime: hour + 1 } : s
+        );
+      }
+
+      // Deselect if clicking the only selected hour
+      if (hour === existing.startTime && existing.endTime === existing.startTime + 1) {
+        return prev.filter((s) => s.courtId !== courtId);
+      }
+
+      // Reset to new hour on this court
+      return prev.map((s) =>
+        s.courtId === courtId
+          ? { ...s, startTime: hour, endTime: hour + 1 }
+          : s
+      );
+    });
   };
 
-  const selectedCourtData = courts.find((c) => c.id === selectedCourt) || null;
+  const handleRemoveSelection = (courtId: string) => {
+    setSelections((prev) => prev.filter((s) => s.courtId !== courtId));
+  };
 
   const handleProceedToCheckout = () => {
-    if (!selectedCourtData || selectedStart === null || selectedEnd === null)
-      return;
+    if (selections.length === 0) return;
 
-    const params = new URLSearchParams({
-      courtId: selectedCourtData.id,
-      courtName: selectedCourtData.name,
-      courtType: selectedCourtData.type,
+    const checkoutData = {
       date: selectedDate,
-      startTime: selectedStart.toString(),
-      endTime: selectedEnd.toString(),
-      totalPrice: calculateTotalPrice(selectedCourtData.type, selectedStart, selectedEnd).toString(),
-    });
+      items: selections.map((s) => ({
+        courtId: s.courtId,
+        courtName: s.courtName,
+        courtType: s.courtType,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        totalPrice: calculateTotalPrice(s.courtType, s.startTime, s.endTime),
+      })),
+    };
 
-    router.push(`/checkout?${params.toString()}`);
+    sessionStorage.setItem("checkoutData", JSON.stringify(checkoutData));
+    router.push("/checkout");
   };
 
   return (
@@ -150,8 +170,7 @@ function BookingPageContent() {
                 selectedDate={selectedDate}
                 onDateChange={(date) => {
                   setSelectedDate(date);
-                  setSelectedStart(null);
-                  setSelectedEnd(null);
+                  setSelections([]);
                 }}
               />
             </section>
@@ -167,9 +186,7 @@ function BookingPageContent() {
                   courts={courts}
                   bookedSlots={bookedSlots}
                   selectedDate={selectedDate}
-                  selectedCourt={selectedCourt}
-                  selectedStart={selectedStart}
-                  selectedEnd={selectedEnd}
+                  selections={selections}
                   onSlotSelect={handleSlotSelect}
                 />
               )}
@@ -179,10 +196,9 @@ function BookingPageContent() {
           {/* Right Column: Booking Summary */}
           <aside className="lg:col-span-4 sticky top-32">
             <BookingSummary
-              court={selectedCourtData}
+              selections={selections}
               date={selectedDate}
-              startTime={selectedStart}
-              endTime={selectedEnd}
+              onRemoveSelection={handleRemoveSelection}
               onProceedToCheckout={handleProceedToCheckout}
             />
           </aside>

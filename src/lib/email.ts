@@ -1,6 +1,8 @@
 import { Resend } from "resend";
+import { generateBookingToken } from "@/lib/booking-token";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://elite-padel.de";
 
 interface BookingConfirmationData {
   customerName: string;
@@ -127,6 +129,14 @@ export async function sendBookingConfirmation(data: BookingConfirmationData) {
         <p>Bitte sei 10 Minuten vor deiner Buchung da, damit du pünktlich starten kannst.</p>
       </div>
 
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${APP_URL}/my?email=${encodeURIComponent(data.customerEmail)}&token=${generateBookingToken(data.customerEmail)}"
+           style="display: inline-block; background: #4a1a12; color: #ffffff; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;">
+          Meine Buchungen verwalten
+        </a>
+        <p style="font-size: 11px; color: #6b6b6b; margin-top: 12px;">Buchungen ansehen, stornieren & Zugangscodes abrufen</p>
+      </div>
+
       <p class="booking-id">Buchungs-ID: ${data.bookingId}</p>
     </div>
     <div class="footer">
@@ -210,6 +220,13 @@ export async function sendCancellationEmail(data: CancellationData) {
         Der Betrag von <strong>${formatPrice(data.totalPrice)}</strong> wird dir in den nächsten Tagen erstattet.
         Bei Fragen kontaktiere uns gerne per E-Mail.
       </p>
+
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${APP_URL}/my?email=${encodeURIComponent(data.customerEmail)}&token=${generateBookingToken(data.customerEmail)}"
+           style="display: inline-block; background: #4a1a12; color: #ffffff; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;">
+          Meine Buchungen ansehen
+        </a>
+      </div>
 
       <p style="font-size: 11px; color: #6b6b6b; text-align: center; margin-top: 16px;">
         Buchungs-ID: ${data.bookingId}

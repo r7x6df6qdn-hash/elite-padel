@@ -13,8 +13,11 @@ interface CheckoutItem {
 }
 
 export async function POST(request: NextRequest) {
+  const t0 = Date.now();
+  const log = (label: string) => console.log(`[CHECKOUT] ${label}: ${Date.now() - t0}ms`);
   try {
     const body = await request.json();
+    log("body parsed");
     const { date, items, customerName, customerEmail, customerPhone } = body;
 
     // Support both old single-item format and new multi-item format
@@ -62,6 +65,7 @@ export async function POST(request: NextRequest) {
         select: { courtId: true, startTime: true, endTime: true, status: true },
       }),
     ]);
+    log("DB queries done");
 
     // Validate courts exist and prices match
     for (const item of checkoutItems) {
@@ -108,6 +112,7 @@ export async function POST(request: NextRequest) {
       })
     );
 
+    log("bookings created");
     const bookingIds = bookings.map((b) => b.id);
 
     // Build Stripe line items
@@ -143,6 +148,7 @@ export async function POST(request: NextRequest) {
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/booking`,
     });
 
+    log("stripe session created");
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
     console.error("Checkout error:", error?.message, error?.type, error?.statusCode);

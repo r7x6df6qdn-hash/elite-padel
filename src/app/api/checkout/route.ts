@@ -37,103 +37,98 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const bookingIds: string[] = [];
-    const lineItems: Array<{
-      price_data: {
-        currency: string;
-        product_data: { name: string; description: string };
-        unit_amount: number;
-      };
-      quantity: number;
-    }> = [];
-
+    // Basic time validation (fast, no DB)
     for (const item of checkoutItems) {
-      const { courtId, courtName, courtType, startTime, endTime, totalPrice } = item;
-
-      if (!courtId || startTime === undefined || endTime === undefined) {
-        return NextResponse.json(
-          { error: "Ungültige Buchungsdaten." },
-          { status: 400 }
-        );
+      if (!item.courtId || item.startTime === undefined || item.endTime === undefined) {
+        return NextResponse.json({ error: "Ungültige Buchungsdaten." }, { status: 400 });
       }
-
-      if (startTime < OPENING_HOUR || endTime > CLOSING_HOUR || startTime >= endTime) {
-        return NextResponse.json(
-          { error: `Ungültiger Zeitslot für ${courtName}.` },
-          { status: 400 }
-        );
+      if (item.startTime < OPENING_HOUR || item.endTime > CLOSING_HOUR || item.startTime >= item.endTime) {
+        return NextResponse.json({ error: `Ungültiger Zeitslot für ${item.courtName}.` }, { status: 400 });
       }
+    }
 
-      // Check court exists
-      const court = await prisma.court.findUnique({ where: { id: courtId } });
-      if (!court) {
-        return NextResponse.json(
-          { error: `Court "${courtName}" nicht gefunden.` },
-          { status: 404 }
-        );
-      }
+    const bookingDate = new Date(date + "T00:00:00.000Z");
 
-      // Verify price
-      const expectedPrice = calculateTotalPrice(court.type, startTime, endTime);
-      if (Math.abs(totalPrice - expectedPrice) > 0.01) {
-        return NextResponse.json(
-          { error: `Preisabweichung bei ${courtName}.` },
-          { status: 400 }
-        );
-      }
-
-      // Check availability
-      const bookingDate = new Date(date + "T00:00:00.000Z");
-      const existingBookings = await prisma.booking.findMany({
+    // Parallel: fetch all courts + check all availabilities at once
+    const courtIds = checkoutItems.map((i) => i.courtId);
+    const [courts, existingBookings] = await Promise.all([
+      prisma.court.findMany({ where: { id: { in: courtIds } } }),
+      prisma.booking.findMany({
         where: {
-          courtId,
+          courtId: { in: courtIds },
           date: bookingDate,
           status: { in: ["pending", "confirmed", "blocked"] },
-          OR: [
-            { startTime: { lt: endTime }, endTime: { gt: startTime } },
-          ],
         },
-      });
+        select: { courtId: true, startTime: true, endTime: true, status: true },
+      }),
+    ]);
 
-      if (existingBookings.length > 0) {
+    // Validate courts exist and prices match
+    for (const item of checkoutItems) {
+      const court = courts.find((c) => c.id === item.courtId);
+      if (!court) {
+        return NextResponse.json({ error: `Court "${item.courtName}" nicht gefunden.` }, { status: 404 });
+      }
+
+      const expectedPrice = calculateTotalPrice(court.type, item.startTime, item.endTime);
+      if (Math.abs(item.totalPrice - expectedPrice) > 0.01) {
+        return NextResponse.json({ error: `Preisabweichung bei ${item.courtName}.` }, { status: 400 });
+      }
+
+      // Check availability from pre-fetched bookings
+      const conflicts = existingBookings.filter(
+        (b) => b.courtId === item.courtId && b.startTime < item.endTime && b.endTime > item.startTime
+      );
+      if (conflicts.length > 0) {
         return NextResponse.json(
-          { error: `${courtName}: Zeitslot ${startTime}:00–${endTime}:00 ist bereits belegt.` },
+          { error: `${item.courtName}: Zeitslot ${item.startTime}:00–${item.endTime}:00 ist bereits belegt.` },
           { status: 409 }
         );
       }
+    }
 
-      // Create booking
-      const hours = endTime - startTime;
-      const booking = await prisma.booking.create({
-        data: {
-          courtId,
-          date: bookingDate,
-          startTime,
-          endTime,
-          customerName,
-          customerEmail,
-          customerPhone: customerPhone || null,
-          totalPrice: expectedPrice,
-          status: "pending",
-        },
-      });
+    // Create all bookings in parallel
+    const bookings = await Promise.all(
+      checkoutItems.map((item) => {
+        const court = courts.find((c) => c.id === item.courtId)!;
+        const expectedPrice = calculateTotalPrice(court.type, item.startTime, item.endTime);
+        return prisma.booking.create({
+          data: {
+            courtId: item.courtId,
+            date: bookingDate,
+            startTime: item.startTime,
+            endTime: item.endTime,
+            customerName,
+            customerEmail,
+            customerPhone: customerPhone || null,
+            totalPrice: expectedPrice,
+            status: "pending",
+          },
+        });
+      })
+    );
 
-      bookingIds.push(booking.id);
+    const bookingIds = bookings.map((b) => b.id);
 
-      lineItems.push({
+    // Build Stripe line items
+    const lineItems = checkoutItems.map((item) => {
+      const court = courts.find((c) => c.id === item.courtId)!;
+      const expectedPrice = calculateTotalPrice(court.type, item.startTime, item.endTime);
+      const hours = item.endTime - item.startTime;
+      return {
         price_data: {
-          currency: "eur",
+          currency: "eur" as const,
           product_data: {
-            name: `Padel Court: ${courtName}`,
-            description: `${date} | ${startTime}:00 - ${endTime}:00 Uhr | ${hours} Stunde(n)`,
+            name: `Padel Court: ${item.courtName}`,
+            description: `${date} | ${item.startTime}:00 - ${item.endTime}:00 Uhr | ${hours} Stunde(n)`,
           },
           unit_amount: Math.round(expectedPrice * 100),
         },
         quantity: 1,
-      });
-    }
+      };
+    });
 
-    // Create single Stripe session for all items
+    // Create Stripe session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",

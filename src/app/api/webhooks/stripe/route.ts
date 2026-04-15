@@ -34,78 +34,94 @@ export async function POST(request: NextRequest) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const bookingId = session.metadata?.bookingId;
 
-    if (bookingId) {
-      // Get or generate daily access code
-      const bookingDate = session.metadata?.date || "";
+    // Support both single bookingId and multiple bookingIds
+    const bookingIds = session.metadata?.bookingIds
+      ? session.metadata.bookingIds.split(",")
+      : session.metadata?.bookingId
+      ? [session.metadata.bookingId]
+      : [];
+
+    const bookingDate = session.metadata?.date || "";
+
+    if (bookingIds.length > 0) {
+      // Generate access code once for the day
       const accessCode = await getOrCreateDailyCode(bookingDate);
 
-      // Update booking to confirmed with access code
-      const booking = await prisma.booking.update({
-        where: { id: bookingId },
-        data: {
-          status: "confirmed",
-          stripePaymentId: session.payment_intent as string,
-          stripeSessionId: session.id,
-          accessCode,
-        },
-        include: { court: true },
-      });
+      // Process all bookings in parallel
+      await Promise.allSettled(
+        bookingIds.map(async (bookingId) => {
+          try {
+            const booking = await prisma.booking.update({
+              where: { id: bookingId },
+              data: {
+                status: "confirmed",
+                stripePaymentId: session.payment_intent as string,
+                stripeSessionId: session.id,
+                accessCode,
+              },
+              include: { court: true },
+            });
 
-      // Send booking confirmation email with access code
-      try {
-        await sendBookingConfirmation({
-          customerName: booking.customerName,
-          customerEmail: booking.customerEmail,
-          courtName: booking.court.name,
-          courtType: booking.court.type,
-          date: bookingDate,
-          startTime: booking.startTime,
-          endTime: booking.endTime,
-          totalPrice: booking.totalPrice,
-          bookingId: booking.id,
-          accessCode,
-        });
-        console.log(`Confirmation email sent for booking ${bookingId}`);
-      } catch (emailError) {
-        console.error("Failed to send confirmation email:", emailError);
-      }
+            // Send email and create invoice in parallel
+            await Promise.allSettled([
+              sendBookingConfirmation({
+                customerName: booking.customerName,
+                customerEmail: booking.customerEmail,
+                courtName: booking.court.name,
+                courtType: booking.court.type,
+                date: bookingDate,
+                startTime: booking.startTime,
+                endTime: booking.endTime,
+                totalPrice: booking.totalPrice,
+                bookingId: booking.id,
+                accessCode,
+              }).then(() => console.log(`Email sent for ${bookingId}`)),
 
-      // Create Easybill invoice
-      try {
-        const invoice = await createInvoice({
-          customerName: booking.customerName,
-          customerEmail: booking.customerEmail,
-          courtName: booking.court.name,
-          date: bookingDate,
-          startTime: booking.startTime,
-          endTime: booking.endTime,
-          totalPrice: booking.totalPrice,
-        });
-
-        await prisma.booking.update({
-          where: { id: bookingId },
-          data: { easybillInvoiceId: invoice.id.toString() },
-        });
-
-        await sendInvoiceByEmail(invoice.id);
-        console.log(`Invoice ${invoice.id} created and sent for booking ${bookingId}`);
-      } catch (invoiceError) {
-        console.error("Failed to create Easybill invoice:", invoiceError);
-      }
+              createInvoice({
+                customerName: booking.customerName,
+                customerEmail: booking.customerEmail,
+                courtName: booking.court.name,
+                date: bookingDate,
+                startTime: booking.startTime,
+                endTime: booking.endTime,
+                totalPrice: booking.totalPrice,
+              }).then(async (invoice) => {
+                await prisma.booking.update({
+                  where: { id: bookingId },
+                  data: { easybillInvoiceId: invoice.id.toString() },
+                });
+                await sendInvoiceByEmail(invoice.id);
+                console.log(`Invoice ${invoice.id} sent for ${bookingId}`);
+              }),
+            ]);
+          } catch (err) {
+            console.error(`Failed to process booking ${bookingId}:`, err);
+          }
+        })
+      );
     }
   }
 
   if (event.type === "checkout.session.expired") {
     const session = event.data.object;
-    const bookingId = session.metadata?.bookingId;
 
-    if (bookingId) {
-      await prisma.booking.update({
-        where: { id: bookingId },
-        data: { status: "cancelled" },
-      });
+    // Support both formats
+    const bookingIds = session.metadata?.bookingIds
+      ? session.metadata.bookingIds.split(",")
+      : session.metadata?.bookingId
+      ? [session.metadata.bookingId]
+      : [];
+
+    if (bookingIds.length > 0) {
+      await Promise.allSettled(
+        bookingIds.map((id) =>
+          prisma.booking.update({
+            where: { id },
+            data: { status: "cancelled" },
+          })
+        )
+      );
     }
   }
 

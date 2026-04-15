@@ -9,10 +9,7 @@ export async function GET(request: NextRequest) {
   const sessionId = request.nextUrl.searchParams.get("session_id");
 
   if (!sessionId) {
-    return NextResponse.json(
-      { error: "Session ID required" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Session ID required" }, { status: 400 });
   }
 
   try {
@@ -34,75 +31,74 @@ export async function GET(request: NextRequest) {
     }
 
     const bookingDate = session.metadata?.date || "";
-    const results = [];
 
-    for (const bookingId of bookingIds) {
-      let booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
-        include: { court: true },
-      });
+    // Fetch all bookings in one query
+    const bookings = await prisma.booking.findMany({
+      where: { id: { in: bookingIds } },
+      include: { court: true },
+    });
 
-      if (!booking) continue;
-
-      // If not yet confirmed, confirm it
-      if (booking.status === "pending" || !booking.accessCode) {
-        const accessCode = booking.accessCode || await getOrCreateDailyCode(bookingDate);
-
-        booking = await prisma.booking.update({
-          where: { id: booking.id },
-          data: {
-            status: "confirmed",
-            stripePaymentId: session.payment_intent as string,
-            stripeSessionId: session.id,
-            accessCode,
-          },
-          include: { court: true },
-        });
-
-        // Send confirmation email if webhook hasn't done it yet
-        if (accessCode && !booking.easybillInvoiceId) {
-          try {
-            await sendBookingConfirmation({
-              customerName: booking.customerName,
-              customerEmail: booking.customerEmail,
-              courtName: booking.court.name,
-              courtType: booking.court.type,
-              date: bookingDate,
-              startTime: booking.startTime,
-              endTime: booking.endTime,
-              totalPrice: booking.totalPrice,
-              bookingId: booking.id,
-              accessCode,
-            });
-          } catch (emailError) {
-            console.error("Failed to send confirmation email:", emailError);
-          }
-        }
-      }
-
-      results.push({
-        id: booking.id,
-        courtName: booking.court.name,
-        courtType: booking.court.type,
-        date: bookingDate,
-        startTime: booking.startTime,
-        endTime: booking.endTime,
-        timeSlot: `${formatTime(booking.startTime)} – ${formatTime(booking.endTime)}`,
-        totalPrice: booking.totalPrice,
-        accessCode: booking.accessCode,
-        status: "confirmed",
-      });
-    }
-
-    // Return array for multi-booking, but also keep backwards compat
-    if (results.length === 1) {
-      return NextResponse.json(results[0]);
-    }
-    return NextResponse.json({ bookings: results });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
+    // Find bookings that need confirmation
+    const needsConfirmation = bookings.filter(
+      (b) => b.status === "pending" || !b.accessCode
     );
+
+    let accessCode: string | null = null;
+    if (needsConfirmation.length > 0) {
+      accessCode = await getOrCreateDailyCode(bookingDate);
+
+      // Update all pending bookings in parallel
+      await Promise.all(
+        needsConfirmation.map((b) =>
+          prisma.booking.update({
+            where: { id: b.id },
+            data: {
+              status: "confirmed",
+              stripePaymentId: session.payment_intent as string,
+              stripeSessionId: session.id,
+              accessCode,
+            },
+          })
+        )
+      );
+
+      // Send confirmation emails in parallel (only if webhook hasn't done it)
+      await Promise.allSettled(
+        needsConfirmation
+          .filter((b) => !b.easybillInvoiceId)
+          .map((b) =>
+            sendBookingConfirmation({
+              customerName: b.customerName,
+              customerEmail: b.customerEmail,
+              courtName: b.court.name,
+              courtType: b.court.type,
+              date: bookingDate,
+              startTime: b.startTime,
+              endTime: b.endTime,
+              totalPrice: b.totalPrice,
+              bookingId: b.id,
+              accessCode: accessCode!,
+            })
+          )
+      );
+    }
+
+    // Build response
+    const results = bookings.map((b) => ({
+      id: b.id,
+      courtName: b.court.name,
+      courtType: b.court.type,
+      date: bookingDate,
+      startTime: b.startTime,
+      endTime: b.endTime,
+      timeSlot: `${formatTime(b.startTime)} – ${formatTime(b.endTime)}`,
+      totalPrice: b.totalPrice,
+      accessCode: accessCode || b.accessCode,
+      status: "confirmed",
+    }));
+
+    return NextResponse.json(results.length === 1 ? results[0] : { bookings: results });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

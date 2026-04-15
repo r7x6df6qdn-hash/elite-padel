@@ -82,6 +82,7 @@ function CheckoutPageContent() {
     setError("");
 
     try {
+      const t0 = performance.now();
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -93,8 +94,10 @@ function CheckoutPageContent() {
           customerPhone,
         }),
       });
+      const fetchTime = Math.round(performance.now() - t0);
 
       const data = await res.json();
+      console.log(`[TIMING] API response: ${fetchTime}ms, server: ${data._timing?.total || "?"}ms`);
 
       if (!res.ok) {
         throw new Error(data.error || "Checkout fehlgeschlagen");

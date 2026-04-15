@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     });
 
     log("stripe session created");
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: session.url, _timing: { total: Date.now() - t0 } });
   } catch (error: any) {
     console.error("Checkout error:", error?.message, error?.type, error?.statusCode);
     return NextResponse.json(

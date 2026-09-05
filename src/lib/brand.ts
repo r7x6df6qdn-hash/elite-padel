@@ -5,6 +5,10 @@
 export const SITE_NAME = "Rückwand";
 export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://rueckwand-padel.de";
 export const CONTACT_EMAIL = "booking@rueckwand-padel.de";
+// Public-facing contact address shown on legal pages (Impressum, Datenschutz)
+// and in general site footers — distinct from CONTACT_EMAIL, which is the
+// booking flow's sending/reply address.
+export const LEGAL_EMAIL = "rueckwand@gmail.com";
 
 // Pre-launch gate: when true, every public route redirects to /coming-soon
 // (see src/middleware.ts) — booking flow stays live under the hood for

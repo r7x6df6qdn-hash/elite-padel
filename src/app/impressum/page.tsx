@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { SITE_NAME, VENUE_ADDRESS } from "@/lib/brand";
+import { SITE_NAME, VENUE_ADDRESS, LEGAL_EMAIL } from "@/lib/brand";
 
 export const metadata = {
   title: `Impressum | ${SITE_NAME}`,
 };
-
-const LEGAL_EMAIL = "rueckwand@gmail.com";
 
 export default function ImpressumPage() {
   return (

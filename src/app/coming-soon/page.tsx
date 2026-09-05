@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   SITE_NAME,
-  CONTACT_EMAIL,
+  LEGAL_EMAIL,
   OPENING_WINDOW_DE,
   OPENING_WINDOW_EN,
   VENUE_ADDRESS,
@@ -223,29 +223,32 @@ function WaitlistForm({ t, locale }: { t: (typeof COPY)[Locale]; locale: Locale 
   };
 
   return (
-    <div className="bg-surface-container-lowest rounded-xl p-8 md:p-10 editorial-shadow text-left">
-      <h2 className="font-headline text-xl italic mb-1">{t.formTitle}</h2>
-      <p className="text-sm text-on-surface-variant font-light mb-4">{t.formHint}</p>
-
-      {count !== null && (
-        <div className="flex items-center gap-2 mb-6 text-secondary">
+    <div className="max-w-md mx-auto">
+      {/* Only shown once the real number is credible on its own — a true
+          but tiny count reads worse than no count at all. Never fake this
+          number; once it's high enough to be worth showing, it shows itself. */}
+      {count !== null && count >= 20 && (
+        <div className="inline-flex items-center gap-2 mb-6 text-secondary bg-secondary-container/50 px-4 py-2 rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse-dot" />
-          <span className="text-xs font-label tracking-wide">
-            {count === 0 ? t.countZero : count === 1 ? t.countOne : t.countMany(count)}
+          <span className="text-xs font-label tracking-wide uppercase">
+            {t.countMany(count)}
           </span>
         </div>
       )}
 
       {status === "success" ? (
-        <div className="flex items-start gap-3 text-secondary">
-          <span className="material-symbols-outlined text-2xl mt-0.5">check_circle</span>
+        <div className="flex flex-col items-center gap-3 text-center text-secondary bg-surface-container-lowest rounded-2xl p-8 md:p-10 editorial-shadow">
+          <span className="material-symbols-outlined text-4xl">check_circle</span>
           <div>
-            <p className="font-medium">{t.successTitle}</p>
+            <p className="font-medium text-lg">{t.successTitle}</p>
             <p className="text-sm text-on-surface-variant font-light">{t.successText}</p>
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-3 bg-surface-container-lowest rounded-2xl p-3 editorial-shadow"
+        >
           <input
             type="email"
             required
@@ -255,7 +258,7 @@ function WaitlistForm({ t, locale }: { t: (typeof COPY)[Locale]; locale: Locale 
               if (status === "error") setStatus("idle");
             }}
             placeholder={t.emailPlaceholder}
-            className="input flex-1"
+            className="input flex-1 shadow-none bg-transparent"
             disabled={status === "loading"}
           />
           <button
@@ -372,6 +375,20 @@ export default function ComingSoonPage() {
             <span className="w-px h-10 bg-white/40" />
           </div>
         </div>
+      </section>
+
+      {/* Waitlist signup — right after the hero, since capturing sign-ups
+          before opening is the most important thing this page can do. */}
+      <section className="px-6 md:px-12 py-20 md:py-24 bg-surface-container-lowest">
+        <Reveal className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight mb-4">
+            {t.formTitle}
+          </h2>
+          <p className="text-on-surface-variant font-light leading-relaxed max-w-md mx-auto mb-10">
+            {t.formHint}
+          </p>
+          <WaitlistForm t={t} locale={locale} />
+        </Reveal>
       </section>
 
       {/* Vision */}
@@ -568,29 +585,40 @@ export default function ComingSoonPage() {
         </Reveal>
       </section>
 
-      {/* Waitlist signup */}
-      <section className="px-6 md:px-12 py-24 bg-surface-container-lowest">
-        <Reveal className="max-w-xl mx-auto">
-          <WaitlistForm t={t} locale={locale} />
-        </Reveal>
-      </section>
-
       {/* Footer */}
       <footer className="px-6 md:px-12 py-12 text-center border-t border-outline-variant/20">
         <img src="/logo.png" alt={SITE_NAME} className="h-6 w-auto mx-auto mb-4" />
         <p className="text-[10px] font-label uppercase tracking-widest text-stone-400 leading-relaxed">
           {t.footerAddressLabel}: {VENUE_ADDRESS.street}, {VENUE_ADDRESS.zip} {VENUE_ADDRESS.city}
           <br />
-          {t.footerContactLabel}: {CONTACT_EMAIL}
+          {t.footerContactLabel}: {LEGAL_EMAIL}
         </p>
         <div className="flex items-center justify-center gap-4 mt-4">
           <a
             href="https://www.instagram.com/rueckwand.club/"
             target="_blank"
             rel="noopener"
+            className="inline-flex items-center gap-1.5 text-[10px] font-label uppercase tracking-widest text-stone-400 hover:text-primary transition-colors underline"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-3.5 h-3.5"
+              aria-hidden="true"
+            >
+              <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="1.8" />
+              <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="1.8" />
+              <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" />
+            </svg>
+            Instagram
+          </a>
+          <span className="text-stone-300">·</span>
+          <a
+            href="/datenschutz"
             className="text-[10px] font-label uppercase tracking-widest text-stone-400 hover:text-primary transition-colors underline"
           >
-            Instagram
+            Datenschutz
           </a>
           <span className="text-stone-300">·</span>
           <a
@@ -600,6 +628,9 @@ export default function ComingSoonPage() {
             Impressum
           </a>
         </div>
+        <p className="text-stone-300 font-label text-[10px] tracking-[0.3em] uppercase mt-6">
+          © {new Date().getFullYear()} {SITE_NAME.toUpperCase()}
+        </p>
       </footer>
     </div>
   );

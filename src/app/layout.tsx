@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SITE_URL } from "@/lib/brand";
 
+// Fallback metadata for any route that doesn't set its own (e.g. a request
+// that momentarily hits "/" before the coming-soon redirect). Routes with
+// real content — /coming-soon, /[locale] — override this with specifics.
 export const metadata: Metadata = {
-  title: "RÜCKWAND | Premium Padel Club",
+  metadataBase: new URL(SITE_URL),
+  title: "Rückwand | Padel Club Ludwigsburg",
   description:
-    "Buche deinen Padel Court online. 3 Doppel & 1 Einzel Court in Ludwigsburg. Eine kuratierte Umgebung für moderne Padel-Exzellenz.",
+    "Rückwand eröffnet Ende 2026 in Ludwigsburg: 3 Doppel- & 1 Einzel-Padelcourt, Gastro & Lounge. Jetzt für die Eröffnung vormerken.",
 };
 
 // Root layout — holds <html>/<body> + fonts (required by Next.js).

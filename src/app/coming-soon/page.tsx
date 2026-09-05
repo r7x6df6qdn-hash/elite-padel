@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   SITE_NAME,
   LEGAL_EMAIL,
@@ -330,10 +331,13 @@ export default function ComingSoonPage() {
           reads as art-directed rather than a stock landing-page layout. */}
       <section className="relative flex flex-col justify-end px-6 md:px-16 pt-32 pb-20 md:pb-24 min-h-[95vh] overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img
+          <Image
             src="/aussenansicht.jpg"
             alt={`${SITE_NAME} building exterior`}
-            className="w-full h-full object-cover object-[2%_center] md:object-center"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[2%_center] md:object-center"
           />
           <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(23,17,15,0.95)_0%,rgba(23,17,15,0.9)_48%,rgba(23,17,15,0.4)_75%,rgba(23,17,15,0.05)_100%)]" />
         </div>
@@ -421,9 +425,12 @@ export default function ComingSoonPage() {
 
         <Reveal delayMs={100} className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
           <div className="rounded-xl overflow-hidden editorial-shadow">
-            <img
+            <Image
               src="/hallenplan.jpg"
               alt={t.floorplanHeadline}
+              width={1536}
+              height={1024}
+              sizes="(min-width: 1024px) 60vw, 100vw"
               className="w-full h-auto block"
             />
           </div>
@@ -481,9 +488,12 @@ export default function ComingSoonPage() {
         </Reveal>
 
         <Reveal delayMs={100} className="rounded-xl overflow-hidden editorial-shadow">
-          <img
+          <Image
             src="/lounge.jpg"
             alt={t.loungeHeadline}
+            width={1448}
+            height={1086}
+            sizes="(min-width: 1280px) 1152px, 100vw"
             className="w-full h-auto block"
           />
         </Reveal>

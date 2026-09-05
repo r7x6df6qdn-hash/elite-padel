@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SITE_NAME, VENUE_ADDRESS, LEGAL_EMAIL } from "@/lib/brand";
+import Logo from "@/components/Logo";
 
 export const metadata = {
   title: `Impressum | ${SITE_NAME}`,
@@ -17,7 +18,7 @@ export default function ImpressumPage() {
           Zurück
         </Link>
 
-        <img src="/logo.png" alt={SITE_NAME} className="h-6 w-auto mb-10" />
+        <Logo className="h-6 w-auto mb-10" />
 
         <span className="section-label">Rechtliches</span>
         <h1 className="text-4xl font-headline italic tracking-tighter mb-12">Impressum</h1>

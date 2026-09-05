@@ -12,6 +12,7 @@ import {
   APPLE_MAPS_URL,
 } from "@/lib/brand";
 import Reveal from "@/components/Reveal";
+import Logo from "@/components/Logo";
 
 type Locale = "de" | "en";
 
@@ -286,21 +287,7 @@ export default function ComingSoonPage() {
           just buried inside the hero. */}
       <header className="fixed top-0 inset-x-0 z-30 bg-background/90 backdrop-blur-md border-b border-outline-variant/30">
         <div className="flex items-center justify-between px-6 md:px-12 py-4">
-          <span
-            role="img"
-            aria-label={SITE_NAME}
-            className="h-5 md:h-6 aspect-[1648/243] bg-primary block"
-            style={{
-              maskImage: "url('/logo.png')",
-              maskRepeat: "no-repeat",
-              maskSize: "contain",
-              maskPosition: "left center",
-              WebkitMaskImage: "url('/logo.png')",
-              WebkitMaskRepeat: "no-repeat",
-              WebkitMaskSize: "contain",
-              WebkitMaskPosition: "left center",
-            }}
-          />
+          <Logo className="h-5 md:h-6 w-auto" />
           <div className="flex items-center gap-1 text-[11px] font-label tracking-widest uppercase">
             <button
               onClick={() => setLocale("de")}
@@ -600,7 +587,7 @@ export default function ComingSoonPage() {
 
       {/* Footer */}
       <footer className="px-6 md:px-12 py-12 text-center border-t border-outline-variant/20">
-        <img src="/logo.png" alt={SITE_NAME} className="h-6 w-auto mx-auto mb-4" />
+        <Logo className="h-6 w-auto mx-auto mb-4" />
         <p className="text-[10px] font-label uppercase tracking-widest text-stone-400 leading-relaxed">
           {t.footerAddressLabel}: {VENUE_ADDRESS.street}, {VENUE_ADDRESS.zip} {VENUE_ADDRESS.city}
           <br />

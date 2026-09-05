@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { routing, Link } from "@/i18n/routing";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import NewsletterForm from "@/components/NewsletterForm";
+import Logo from "@/components/Logo";
 import { SITE_URL } from "@/lib/brand";
 
 export function generateStaticParams() {
@@ -86,7 +87,7 @@ export default async function LocaleLayout({
 
           {/* Centered Brand */}
           <Link href="/" className="block">
-            <img src="/logo.png" alt="Rückwand" className="h-6 md:h-7 w-auto" />
+            <Logo className="h-6 md:h-7 w-auto" />
           </Link>
 
           {/* Right Navigation */}
@@ -120,7 +121,7 @@ export default async function LocaleLayout({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-end max-w-screen-2xl mx-auto">
           <div className="space-y-12">
             <div>
-              <img src="/logo.png" alt="Rückwand" className="h-7 w-auto" />
+              <Logo className="h-7 w-auto" />
             </div>
             <div className="space-y-4">
               <p className="text-stone-500 font-body text-sm font-light tracking-wide max-w-xs leading-relaxed">

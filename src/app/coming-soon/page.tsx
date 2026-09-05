@@ -436,9 +436,11 @@ export default function ComingSoonPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {t.features.map((f, i) => (
             <Reveal key={f.n} delayMs={i * 80}>
-              <div className="bg-surface-container-lowest rounded-xl p-8 editorial-shadow transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
+              <div className="group bg-surface-container-lowest rounded-xl p-8 editorial-shadow transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
                 <span className="font-headline italic text-2xl text-primary mb-3 block">{f.n}</span>
-                <h3 className="font-body font-medium mb-2">{f.title}</h3>
+                <h3 className="font-body font-medium mb-2 transition-colors duration-300 group-hover:text-primary">
+                  {f.title}
+                </h3>
                 <p className="text-sm text-on-surface-variant font-light leading-relaxed">{f.text}</p>
               </div>
             </Reveal>
@@ -477,18 +479,26 @@ export default function ComingSoonPage() {
             <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight mb-6">
               {t.bookingHeadline}
             </h2>
-            <p className="text-stone-300 font-light max-w-xl mx-auto leading-relaxed">
+            <p className="text-stone-300 font-light max-w-xl mx-auto leading-relaxed mb-6">
               {t.bookingIntro}
             </p>
+            <span className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full pl-2 pr-4 py-1.5">
+              <img src="/playtomic-icon.svg" alt="" className="h-5 w-5 rounded-[5px]" />
+              <span className="font-label text-[11px] tracking-[0.2em] uppercase text-white/80">
+                Playtomic
+              </span>
+            </span>
           </Reveal>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {t.bookingSteps.map((s, i) => (
               <Reveal key={s.n} delayMs={i * 80}>
-                <div className="transition-transform duration-300 hover:-translate-y-1">
+                <div className="group transition-transform duration-300 hover:-translate-y-1">
                   <span className="font-headline italic text-2xl text-primary-container mb-3 block">
                     {s.n}
                   </span>
-                  <h3 className="font-body font-medium mb-2">{s.title}</h3>
+                  <h3 className="font-body font-medium mb-2 transition-colors duration-300 group-hover:text-primary-fixed-dim">
+                    {s.title}
+                  </h3>
                   <p className="text-sm text-stone-400 font-light leading-relaxed">{s.text}</p>
                 </div>
               </Reveal>

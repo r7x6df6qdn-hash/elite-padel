@@ -46,18 +46,59 @@ export default function DatenschutzPage() {
 
           <section>
             <h2 className="font-label text-[10px] tracking-widest uppercase text-on-surface-variant mb-3">
-              Hosting & Server-Logfiles
+              Allgemeines zur Datenverarbeitung
+            </h2>
+            <p>
+              Wir verarbeiten personenbezogene Daten unserer Nutzer grundsätzlich nur, soweit dies
+              zur Bereitstellung einer funktionsfähigen Website sowie unserer Inhalte und
+              Leistungen erforderlich ist. Die Verarbeitung erfolgt regelmäßig nur nach
+              Einwilligung oder soweit eine gesetzliche Grundlage dies gestattet.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-label text-[10px] tracking-widest uppercase text-on-surface-variant mb-3">
+              Bereitstellung der Website und Server-Logfiles
+            </h2>
+            <p>
+              Bei jedem Aufruf dieser Website erfasst unser System automatisiert Daten und
+              Informationen vom Computersystem des aufrufenden Rechners (z. B. IP-Adresse, Datum
+              und Uhrzeit der Anfrage, Browsertyp und -version, verwendetes Betriebssystem,
+              Referrer-URL). Diese Server-Logfiles werden für die Dauer von maximal 30 Tagen
+              gespeichert und dienen ausschließlich der Sicherstellung eines störungsfreien
+              Betriebs der Website sowie der Auswertung von Systemsicherheit und -stabilität.
+              Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-label text-[10px] tracking-widest uppercase text-on-surface-variant mb-3">
+              Hosting
             </h2>
             <p>
               Diese Website wird bei einem externen Dienstleister (Hosting-Provider) gehostet.
               Personenbezogene Daten, die auf dieser Website erfasst werden, werden auf den
-              Servern des Hosters gespeichert. Bei jedem Aufruf der Website erfasst der Server
-              automatisch sogenannte Server-Logfiles, die Ihr Browser übermittelt (z. B. IP-Adresse,
-              Datum und Uhrzeit der Anfrage, Browsertyp, Referrer-URL). Diese Daten dienen
-              ausschließlich der technischen Bereitstellung und Absicherung der Website und werden
-              nicht mit anderen Datenquellen zusammengeführt. Rechtsgrundlage ist Art. 6 Abs. 1
-              lit. f DSGVO (berechtigtes Interesse an einem sicheren und funktionsfähigen Betrieb
-              der Website).
+              Servern des Hosters verarbeitet und gespeichert. Der Hosting-Anbieter wird nur in
+              dem Umfang tätig, wie dies zur Erfüllung seiner Leistungspflichten erforderlich ist,
+              und handelt nach unseren Weisungen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
+              (berechtigtes Interesse an einer zuverlässigen und sicheren Bereitstellung der
+              Website).
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-label text-[10px] tracking-widest uppercase text-on-surface-variant mb-3">
+              Kontaktaufnahme per E-Mail
+            </h2>
+            <p>
+              Wenn Sie uns per E-Mail kontaktieren, wird Ihre Anfrage inklusive aller daraus
+              hervorgehenden personenbezogenen Daten (Name, Anfrage) zum Zwecke der Bearbeitung
+              Ihres Anliegens bei uns gespeichert. Diese Daten geben wir nicht ohne Ihre
+              Einwilligung weiter. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes
+              Interesse an der Beantwortung Ihrer Anfrage) bzw. Art. 6 Abs. 1 lit. b DSGVO, wenn
+              die Anfrage auf den Abschluss eines Vertrags gerichtet ist. Die Daten werden
+              gelöscht, sobald sie für die Bearbeitung Ihres Anliegens nicht mehr erforderlich
+              sind.
             </p>
           </section>
 
@@ -100,6 +141,18 @@ export default function DatenschutzPage() {
               der Anmeldesitzung im internen Admin-Bereich. Diese Cookies enthalten keine
               Trackingfunktion und werden nicht zu Werbe- oder Analysezwecken genutzt.
               Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-label text-[10px] tracking-widest uppercase text-on-surface-variant mb-3">
+              Externe Links (Instagram)
+            </h2>
+            <p>
+              Auf unserer Website verlinken wir auf unser Instagram-Profil. Beim Anklicken des
+              Links verlassen Sie unsere Website und werden zu Instagram (Meta Platforms Ireland
+              Limited) weitergeleitet. Dort gilt die Datenschutzerklärung von Meta; auf die dortige
+              Datenverarbeitung haben wir keinen Einfluss.
             </p>
           </section>
 

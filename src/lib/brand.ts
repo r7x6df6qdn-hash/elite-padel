@@ -15,8 +15,8 @@ export const LEGAL_EMAIL = "rueckwand@gmail.com";
 // testing via /admin, just not linked or reachable by visitors. Flip to
 // false + redeploy once the venue is ready to open for real bookings.
 export const COMING_SOON = true;
-export const OPENING_WINDOW_DE = "Dezember / Januar";
-export const OPENING_WINDOW_EN = "December / January";
+export const OPENING_WINDOW_DE = "Ende 2026";
+export const OPENING_WINDOW_EN = "late 2026";
 
 // Venue address — shared between booking-confirmation emails (src/lib/email.ts)
 // and the /coming-soon page. Single source of truth: update here + regenerate

@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       startTime,
       endTime,
       customerName: reason || "Gesperrt",
-      customerEmail: "admin@elite-padel.de",
+      customerEmail: "admin@rueckwand-padel.de",
       totalPrice: 0,
       status: "blocked",
     },

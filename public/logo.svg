@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" role="img" aria-label="Elite Padel">
+  <title>Elite Padel</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@1,400&display=swap');
+    .word {
+      font-family: 'Noto Serif', 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 148px;
+      fill: #69251b;
+      letter-spacing: -0.02em;
+    }
+  </style>
+  <text class="word" x="60" y="160">Elite</text>
+  <text class="word" x="220" y="300">Padel</text>
+</svg>

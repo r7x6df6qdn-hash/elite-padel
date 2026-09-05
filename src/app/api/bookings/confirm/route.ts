@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
     }
 
     const bookingDate = session.metadata?.date || "";
+    const locale: "de" | "en" = session.metadata?.locale === "en" ? "en" : "de";
 
     // Fetch all bookings in one query
     const bookings = await prisma.booking.findMany({
@@ -78,6 +79,7 @@ export async function GET(request: NextRequest) {
               totalPrice: b.totalPrice,
               bookingId: b.id,
               accessCode: accessCode!,
+              locale,
             })
           )
       );

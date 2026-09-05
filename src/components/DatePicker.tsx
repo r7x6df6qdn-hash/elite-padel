@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
+
 interface DatePickerProps {
   selectedDate: string;
   onDateChange: (date: string) => void;
@@ -9,6 +11,9 @@ export default function DatePicker({
   selectedDate,
   onDateChange,
 }: DatePickerProps) {
+  const locale = useLocale();
+  const t = useTranslations("booking.datePicker");
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -21,16 +26,18 @@ export default function DatePicker({
   const formatDateStr = (date: Date) =>
     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
-  const dayNames = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-  const monthNames = [
-    "Jan", "Feb", "Mär", "Apr", "Mai", "Jun",
-    "Jul", "Aug", "Sep", "Okt", "Nov", "Dez",
-  ];
+  const bcpLocale = locale === "en" ? "en-GB" : "de-DE";
+
+  const formatDayName = (date: Date) =>
+    date.toLocaleDateString(bcpLocale, { weekday: "short" });
+
+  const formatMonthName = (date: Date) =>
+    date.toLocaleDateString(bcpLocale, { month: "short" });
 
   return (
     <div>
       <label className="block text-[10px] font-label uppercase tracking-widest text-stone-500 mb-4">
-        Calendar Date
+        {t("label")}
       </label>
       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
         {dates.map((date) => {
@@ -53,7 +60,7 @@ export default function DatePicker({
                   isSelected ? "text-on-primary/70" : "text-stone-400"
                 }`}
               >
-                {dayNames[date.getDay()]}
+                {formatDayName(date)}
               </span>
               <span className="text-xl font-headline italic mt-1">
                 {date.getDate()}
@@ -63,7 +70,7 @@ export default function DatePicker({
                   isSelected ? "text-on-primary/70" : "text-stone-400"
                 }`}
               >
-                {monthNames[date.getMonth()]}
+                {formatMonthName(date)}
               </span>
               {isToday && (
                 <span
@@ -71,7 +78,7 @@ export default function DatePicker({
                     isSelected ? "text-on-primary" : "text-primary"
                   }`}
                 >
-                  Heute
+                  {t("today")}
                 </span>
               )}
             </button>

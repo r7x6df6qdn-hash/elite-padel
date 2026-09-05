@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateDailyCode } from "@/lib/access-code";
+import { getSettings } from "@/lib/settings";
 
 function isAdmin(request: NextRequest) {
   return request.cookies.get("admin_session")?.value === "authenticated";
@@ -20,6 +21,9 @@ export async function GET(request: NextRequest) {
     todayBookings,
     monthBookings,
     courts,
+    settings,
+    students,
+    waitlist,
   ] = await Promise.all([
     prisma.booking.findMany({
       include: { court: true },
@@ -41,6 +45,15 @@ export async function GET(request: NextRequest) {
       },
     }),
     prisma.court.findMany(),
+    getSettings(),
+    prisma.studentVerification.findMany({
+      orderBy: { verifiedAt: "desc" },
+      take: 200,
+    }),
+    prisma.waitlistSignup.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 1000,
+    }),
   ]);
 
   // Generate access codes for next 30 days
@@ -76,5 +89,8 @@ export async function GET(request: NextRequest) {
     todaySchedule: todayBookings,
     courts,
     accessCodes,
+    settings,
+    students,
+    waitlist,
   });
 }

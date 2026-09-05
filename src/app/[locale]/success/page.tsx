@@ -2,6 +2,8 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 
 interface BookingResult {
   id: string;
@@ -29,13 +31,15 @@ function SuccessPageContent() {
   const sessionId = searchParams.get("session_id");
   const [bookings, setBookings] = useState<BookingResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const t = useTranslations("success");
+  const locale = useLocale();
+  const currencyLocale = locale === "en" ? "en-GB" : "de-DE";
 
   useEffect(() => {
     if (sessionId) {
       fetch(`/api/bookings/confirm?session_id=${sessionId}`)
         .then((res) => res.json())
         .then((data) => {
-          // Handle both single booking and multiple bookings response
           if (data.bookings) {
             setBookings(data.bookings);
           } else if (data.id) {
@@ -54,7 +58,7 @@ function SuccessPageContent() {
       <div className="pt-40 pb-24 max-w-2xl mx-auto px-6 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
         <p className="mt-6 text-on-surface-variant font-light font-label text-xs tracking-widest uppercase">
-          Confirming your reservation...
+          {t("loading")}
         </p>
       </div>
     );
@@ -76,15 +80,14 @@ function SuccessPageContent() {
           </span>
         </div>
 
-        <span className="section-label">Reservation Confirmed</span>
+        <span className="section-label">{t("badge")}</span>
 
         <h1 className="text-4xl md:text-5xl font-headline italic tracking-tighter text-on-surface mb-6">
-          Welcome to the <span className="text-primary">Court.</span>
+          {t("headline")} <span className="text-primary">{t("headlineAccent")}</span>
         </h1>
 
         <p className="text-on-surface-variant font-light leading-relaxed mb-10 max-w-md mx-auto">
-          Vielen Dank für deine Buchung. Du erhältst in Kürze eine
-          Bestätigungsmail mit deiner Rechnung und deinem Zugangscode.
+          {t("description")}
         </p>
 
         {bookings.length > 0 && (
@@ -93,13 +96,13 @@ function SuccessPageContent() {
             {accessCode && (
               <div className="bg-primary text-on-primary rounded-xl p-8 mb-8">
                 <p className="text-[10px] font-label uppercase tracking-[0.3em] opacity-80 mb-2">
-                  Zugangscode Halle
+                  {t("accessCode.label")}
                 </p>
                 <p className="text-4xl font-headline tracking-[0.3em] font-bold">
                   {accessCode}
                 </p>
                 <p className="text-[10px] opacity-60 mt-3">
-                  Gültig am Buchungstag &bull; Bitte Code nicht weitergeben
+                  {t("accessCode.note")}
                 </p>
               </div>
             )}
@@ -110,14 +113,14 @@ function SuccessPageContent() {
                 <div key={booking.id} className="bg-surface-container-low rounded-xl p-8 text-left space-y-4">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
-                      Buchungsnummer
+                      {t("booking.id")}
                     </span>
                     <span className="font-mono font-medium text-xs">{booking.id}</span>
                   </div>
                   {booking.courtName && (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
-                        Court
+                        {t("booking.court")}
                       </span>
                       <span className="font-medium">{booking.courtName}</span>
                     </div>
@@ -125,27 +128,27 @@ function SuccessPageContent() {
                   {booking.timeSlot && (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
-                        Zeitfenster
+                        {t("booking.timeSlot")}
                       </span>
-                      <span className="font-medium">{booking.timeSlot} Uhr</span>
+                      <span className="font-medium">{booking.timeSlot}</span>
                     </div>
                   )}
                   {booking.totalPrice > 0 && (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
-                        Preis
+                        {t("booking.price")}
                       </span>
                       <span className="font-medium">
-                        {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(booking.totalPrice)}
+                        {new Intl.NumberFormat(currencyLocale, { style: "currency", currency: "EUR" }).format(booking.totalPrice)}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-[10px] font-label uppercase tracking-widest text-stone-500">
-                      Status
+                      {t("booking.status")}
                     </span>
                     <span className="text-secondary font-label text-[10px] tracking-widest uppercase bg-secondary-container px-3 py-1 rounded">
-                      Bestätigt
+                      {t("booking.confirmed")}
                     </span>
                   </div>
                 </div>
@@ -156,9 +159,9 @@ function SuccessPageContent() {
             {bookings.length > 1 && (
               <div className="bg-surface-container-low rounded-xl p-6 mb-10">
                 <div className="flex justify-between items-center">
-                  <span className="font-headline italic text-lg">Gesamt</span>
+                  <span className="font-headline italic text-lg">{t("total")}</span>
                   <span className="text-2xl font-headline italic text-primary">
-                    {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(totalPrice)}
+                    {new Intl.NumberFormat(currencyLocale, { style: "currency", currency: "EUR" }).format(totalPrice)}
                   </span>
                 </div>
               </div>
@@ -167,18 +170,18 @@ function SuccessPageContent() {
         )}
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
+          <Link
             href="/booking"
             className="bg-primary text-on-primary px-10 py-4 rounded-lg font-label text-xs tracking-widest uppercase transition-all hover:opacity-90"
           >
-            Weitere Buchung
-          </a>
-          <a
+            {t("newBooking")}
+          </Link>
+          <Link
             href="/"
             className="bg-surface-container-high text-on-surface px-10 py-4 rounded-lg font-label text-xs tracking-widest uppercase transition-all hover:bg-surface-variant"
           >
-            Zur Startseite
-          </a>
+            {t("home")}
+          </Link>
         </div>
       </div>
     </div>

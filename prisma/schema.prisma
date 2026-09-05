@@ -13,6 +13,10 @@ model Court {
   type        String    // "standard" (Einzel) or "double" (Doppel)
   pricePerHour Float
   description String?
+  // Soft-hide courts that are no longer bookable (e.g. removed from this
+  // venue) without orphaning historical bookings. Public booking endpoints
+  // filter on hidden=false; admin views still show everything.
+  hidden      Boolean   @default(false)
   bookings    Booking[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -45,4 +49,33 @@ model AccessCode {
   createdAt DateTime @default(now())
 
   @@unique([validDate])
+}
+
+// Generic key-value store for runtime-editable settings (WiFi, venue info, etc.)
+// Admin-maintained via /admin dashboard.
+model Setting {
+  key       String   @id              // e.g. "wifi_ssid", "wifi_password"
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// Persistent "this email belongs to a verified student" flag. We do NOT
+// store the uploaded ID image (DSGVO: collect only what's needed). The
+// upload acts as a friction barrier; verification is granted on receipt
+// of any valid image file. Re-verification needed after `expiresAt`.
+model StudentVerification {
+  email      String   @id
+  verifiedAt DateTime @default(now())
+  expiresAt  DateTime
+  // Track who/what marked it valid for audit + revoke trail.
+  revoked    Boolean  @default(false)
+  revokedAt  DateTime?
+}
+
+// Pre-launch email waitlist, collected on /coming-soon. Locale is stored so
+// the eventual "we're open" blast can be sent in the visitor's language.
+model WaitlistSignup {
+  email     String   @id
+  locale    String   @default("de")
+  createdAt DateTime @default(now())
 }

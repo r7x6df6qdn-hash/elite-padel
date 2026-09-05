@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import DatePicker from "@/components/DatePicker";
 import TimeSlotGrid, { type Selection } from "@/components/TimeSlotGrid";
 import BookingSummary from "@/components/BookingSummary";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { calculateTotalPrice } from "@/lib/constants";
+import { useTranslations } from "next-intl";
 
 interface Court {
   id: string;
@@ -33,6 +35,10 @@ function BookingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedCourt = searchParams.get("court");
+  const t = useTranslations("booking");
+
+  // Suppress unused warning
+  void preselectedCourt;
 
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -41,6 +47,28 @@ function BookingPageContent() {
   const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
   const [selections, setSelections] = useState<Selection[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Mobile scroll-to-summary helper: the summary sits below the grid on
+  // small screens, so a floating pill nudges users down once they've picked
+  // a slot. Hidden once the summary is already in view (or on desktop, where
+  // it's a sticky sidebar).
+  const summaryRef = useRef<HTMLElement>(null);
+  const [summaryInView, setSummaryInView] = useState(false);
+
+  useEffect(() => {
+    const node = summaryRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setSummaryInView(entry.isIntersecting),
+      { threshold: 0.3 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToSummary = () => {
+    summaryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -77,7 +105,6 @@ function BookingPageContent() {
       const existing = prev.find((s) => s.courtId === courtId);
 
       if (!existing) {
-        // New court — add selection
         return [...prev, {
           courtId,
           courtName: court.name,
@@ -87,19 +114,16 @@ function BookingPageContent() {
         }];
       }
 
-      // Extend range if clicking the next hour
       if (hour === existing.endTime) {
         return prev.map((s) =>
           s.courtId === courtId ? { ...s, endTime: hour + 1 } : s
         );
       }
 
-      // Deselect if clicking the only selected hour
       if (hour === existing.startTime && existing.endTime === existing.startTime + 1) {
         return prev.filter((s) => s.courtId !== courtId);
       }
 
-      // Reset to new hour on this court
       return prev.map((s) =>
         s.courtId === courtId
           ? { ...s, startTime: hour, endTime: hour + 1 }
@@ -146,14 +170,14 @@ function BookingPageContent() {
           </div>
           <div className="relative z-10 max-w-3xl">
             <span className="font-label text-xs tracking-[0.4em] uppercase text-primary-fixed-dim mb-6 block">
-              Reservation
+              {t("hero.badge")}
             </span>
             <h1 className="text-5xl md:text-7xl font-headline italic leading-[1.1] mb-8 tracking-tighter">
-              The Art of <br />
-              <span className="text-primary-fixed">Strategic Value.</span>
+              {t("hero.headline")} <br />
+              <span className="text-primary-fixed">{t("hero.headlineAccent")}</span>
             </h1>
             <p className="text-lg text-stone-300 font-body font-light max-w-xl leading-relaxed">
-              Wähle Datum, Court und Zeitslot für deine Buchung. Echtzeit-Verfügbarkeit aller 6 Courts.
+              {t("hero.description")}
             </p>
           </div>
         </div>
@@ -194,7 +218,7 @@ function BookingPageContent() {
           </div>
 
           {/* Right Column: Booking Summary */}
-          <aside className="lg:col-span-4 sticky top-32">
+          <aside ref={summaryRef} className="lg:col-span-4 sticky top-32">
             <BookingSummary
               selections={selections}
               date={selectedDate}
@@ -204,6 +228,19 @@ function BookingPageContent() {
           </aside>
         </div>
       </div>
+
+      {/* Mobile-only floating scroll-to-summary button */}
+      {selections.length > 0 && !summaryInView && (
+        <button
+          type="button"
+          onClick={scrollToSummary}
+          aria-label={t("scrollHint.label")}
+          className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 rounded-full bg-primary text-on-primary px-5 py-3 editorial-shadow font-label text-xs tracking-[0.2em] uppercase animate-bounce-subtle"
+        >
+          <span>{t("scrollHint.label")}</span>
+          <span className="material-symbols-outlined text-base">arrow_downward</span>
+        </button>
+      )}
     </div>
   );
 }

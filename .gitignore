@@ -5,3 +5,7 @@ node_modules/
 .env
 .env.local
 .vercel
+.DS_Store
+.impeccable/
+tsconfig.tsbuildinfo
+scripts/.cache/

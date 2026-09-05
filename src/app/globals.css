@@ -33,7 +33,7 @@
   }
 
   .btn-secondary {
-    @apply bg-white/10 backdrop-blur-md text-white border border-white/20 px-8 py-3 rounded-lg font-label text-xs tracking-widest uppercase transition-all hover:bg-white/20;
+    @apply bg-stone-900/50 backdrop-blur-md text-white border border-white/40 px-8 py-3 rounded-lg font-label text-xs tracking-widest uppercase transition-all hover:bg-stone-900/70;
   }
 
   .btn-outline {
@@ -45,7 +45,7 @@
   }
 
   .input {
-    @apply w-full bg-white border-none rounded-lg p-4 text-sm font-label text-on-surface focus:ring-1 focus:ring-primary outline-none transition-all shadow-sm;
+    @apply w-full bg-surface-container-lowest border-none rounded-lg p-4 text-sm font-label text-on-surface focus:ring-1 focus:ring-primary outline-none transition-all shadow-sm;
   }
 
   .label {
@@ -55,4 +55,74 @@
   .section-label {
     @apply font-label text-xs tracking-[0.3em] uppercase text-primary mb-4 block;
   }
+}
+
+/* Subtle bounce for the mobile "jump to summary" hint — gentler than
+   Tailwind's default animate-bounce, which is too loud for a floating CTA. */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, -6px); }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce-subtle { animation: none; }
+}
+
+/* Scroll-reveal: sections start slightly below + transparent, then settle
+   into place once they enter the viewport (see useScrollReveal hook).
+   Applied via a plain class toggle rather than a JS animation library —
+   keeps the coming-soon page dependency-free. */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Gentle breathing pulse for small live-status indicators (address-pill dot,
+   "Coming Soon" badge) — signals "this page is alive" without being a loud
+   blinking animation. */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.85); }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-dot { animation: none; }
+}
+
+/* Plain vertical bounce (no horizontal translate) for in-flow elements like
+   the hero scroll indicator — bounce-subtle above bakes in a translateX(-50%)
+   that's only correct for absolutely-centered floating elements. */
+@keyframes bounce-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(8px); }
+}
+
+.animate-bounce-y {
+  animation: bounce-y 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce-y { animation: none; }
 }

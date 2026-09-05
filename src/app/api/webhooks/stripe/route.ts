@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
       : [];
 
     const bookingDate = session.metadata?.date || "";
+    const locale: "de" | "en" = session.metadata?.locale === "en" ? "en" : "de";
 
     if (bookingIds.length > 0) {
       // Generate access code once for the day
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
                 totalPrice: booking.totalPrice,
                 bookingId: booking.id,
                 accessCode,
+                locale,
               }).then(() => console.log(`Email sent for ${bookingId}`)),
 
               createInvoice({

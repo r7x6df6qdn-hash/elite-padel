@@ -4,7 +4,8 @@ import { verifyBookingToken } from "@/lib/booking-token";
 import { sendCancellationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
-  const { email, token, bookingId } = await request.json();
+  const { email, token, bookingId, locale: rawLocale } = await request.json();
+  const locale: "de" | "en" = rawLocale === "en" ? "en" : "de";
 
   if (!email || !token || !bookingId) {
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });

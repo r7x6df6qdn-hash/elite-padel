@@ -29,6 +29,25 @@ type Court = {
   type: string;
 };
 
+type Settings = {
+  wifi_ssid: string;
+  wifi_password: string;
+};
+
+type StudentVerification = {
+  email: string;
+  verifiedAt: string;
+  expiresAt: string;
+  revoked: boolean;
+  revokedAt: string | null;
+};
+
+type WaitlistSignup = {
+  email: string;
+  locale: string;
+  createdAt: string;
+};
+
 type DashboardData = {
   stats: {
     totalBookings: number;
@@ -42,6 +61,9 @@ type DashboardData = {
   todaySchedule: Booking[];
   courts: Court[];
   accessCodes: AccessCodeEntry[];
+  settings: Settings;
+  students: StudentVerification[];
+  waitlist: WaitlistSignup[];
 };
 
 function formatTime(hour: number) {
@@ -85,7 +107,12 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<"dashboard" | "bookings" | "customers" | "codes" | "blocks">("dashboard");
+  const [tab, setTab] = useState<"dashboard" | "bookings" | "customers" | "codes" | "blocks" | "students" | "waitlist" | "settings">("dashboard");
+  const [studentBusy, setStudentBusy] = useState<string | null>(null);
+  const [wifiDraft, setWifiDraft] = useState<{ ssid: string; password: string }>({ ssid: "", password: "" });
+  const [wifiSaving, setWifiSaving] = useState(false);
+  const [wifiMessage, setWifiMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
+  const [showWifiPassword, setShowWifiPassword] = useState(false);
   const [filter, setFilter] = useState<"all" | "confirmed" | "pending" | "cancelled">("all");
   const [customerSearch, setCustomerSearch] = useState("");
   const [chartRange, setChartRange] = useState<"7" | "30">("7");
@@ -104,11 +131,77 @@ export default function AdminPage() {
     setLoading(true);
     const res = await fetch("/api/admin/dashboard");
     if (res.ok) {
-      setData(await res.json());
+      const payload = await res.json();
+      setData(payload);
       setIsAuthenticated(true);
+      // Hydrate draft from server-side truth on every fetch.
+      if (payload.settings) {
+        setWifiDraft({
+          ssid: payload.settings.wifi_ssid ?? "",
+          password: payload.settings.wifi_password ?? "",
+        });
+      }
     }
     setLoading(false);
   }, []);
+
+  const handleSaveWifi = async () => {
+    setWifiSaving(true);
+    setWifiMessage(null);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wifi_ssid: wifiDraft.ssid,
+          wifi_password: wifiDraft.password,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Speichern fehlgeschlagen");
+      }
+      const updated: Settings = await res.json();
+      setData((prev) => (prev ? { ...prev, settings: updated } : prev));
+      setWifiDraft({ ssid: updated.wifi_ssid, password: updated.wifi_password });
+      setWifiMessage({ kind: "success", text: "Gespeichert. Neue Mails nutzen ab sofort diese Daten." });
+    } catch (e: any) {
+      setWifiMessage({ kind: "error", text: e?.message || "Speichern fehlgeschlagen" });
+    } finally {
+      setWifiSaving(false);
+    }
+  };
+
+  const [waitlistCopyMsg, setWaitlistCopyMsg] = useState("");
+  const handleCopyWaitlistEmails = async () => {
+    const emails = (data?.waitlist ?? []).map((w) => w.email).join(", ");
+    try {
+      await navigator.clipboard.writeText(emails);
+      setWaitlistCopyMsg("Kopiert!");
+    } catch {
+      setWaitlistCopyMsg("Kopieren fehlgeschlagen");
+    }
+    setTimeout(() => setWaitlistCopyMsg(""), 2000);
+  };
+
+  const handleStudentAction = async (email: string, action: "revoke" | "restore") => {
+    setStudentBusy(email);
+    try {
+      const res = await fetch("/api/admin/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, action }),
+      });
+      if (res.ok) await fetchDashboard();
+    } finally {
+      setStudentBusy(null);
+    }
+  };
+
+  const wifiDirty =
+    !!data?.settings &&
+    (wifiDraft.ssid !== data.settings.wifi_ssid ||
+      wifiDraft.password !== data.settings.wifi_password);
 
   useEffect(() => {
     fetchDashboard();
@@ -238,7 +331,7 @@ export default function AdminPage() {
       <div className="min-h-screen bg-background flex items-center justify-center px-6">
         <div className="w-full max-w-sm">
           <div className="text-center mb-12">
-            <h1 className="text-2xl font-headline italic text-on-surface tracking-tight">ELITE PADEL</h1>
+            <h1 className="text-2xl font-headline italic text-on-surface tracking-tight">RÜCKWAND</h1>
             <p className="text-on-surface-variant font-label text-[10px] tracking-[0.3em] uppercase mt-2">Admin Console</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-6">
@@ -292,7 +385,7 @@ export default function AdminPage() {
       <div className="bg-surface-container-lowest border-b border-outline-variant">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <h1 className="text-lg font-headline italic text-on-surface">ELITE PADEL</h1>
+            <h1 className="text-lg font-headline italic text-on-surface">RÜCKWAND</h1>
             <span className="text-[10px] font-label tracking-[0.2em] uppercase text-on-surface-variant bg-surface-container px-3 py-1 rounded">Admin</span>
           </div>
           <a href="/" className="text-[10px] font-label tracking-widest uppercase text-on-surface-variant hover:text-on-surface transition-colors">
@@ -314,7 +407,7 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="flex gap-1 bg-surface-container-high rounded-lg p-1 mb-8 w-fit">
-          {(["dashboard", "bookings", "customers", "codes", "blocks"] as const).map((t) => (
+          {(["dashboard", "bookings", "customers", "codes", "blocks", "students", "waitlist", "settings"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -324,7 +417,7 @@ export default function AdminPage() {
                   : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              {{ dashboard: "Dashboard", bookings: "Buchungen", customers: "Kunden", codes: "Codes", blocks: "Sperren" }[t]}
+              {{ dashboard: "Dashboard", bookings: "Buchungen", customers: "Kunden", codes: "Codes", blocks: "Sperren", students: "Studenten", waitlist: "Warteliste", settings: "Einstellungen" }[t]}
             </button>
           ))}
         </div>
@@ -877,6 +970,255 @@ export default function AdminPage() {
                   {customerSearch ? "Keine Kunden gefunden" : "Noch keine Kunden"}
                 </p>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Students Tab */}
+        {tab === "students" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-headline italic mb-1">Studenten-Verifizierungen</h2>
+              <p className="text-sm text-on-surface-variant font-light">
+                E-Mail-Adressen, die per Ausweis-Upload als Student verifiziert wurden. Der 20% Rabatt gilt automatisch Mo–Fr von 08:00 bis 12:00 Uhr. Bei Missbrauch widerrufen — die Email kann sich danach neu verifizieren.
+              </p>
+            </div>
+
+            {data?.students.length === 0 ? (
+              <div className="bg-surface-container-low rounded-xl p-12 text-center">
+                <span className="material-symbols-outlined text-5xl text-stone-300 mb-3 block">school</span>
+                <p className="text-on-surface-variant font-light">Noch keine Verifizierungen.</p>
+              </div>
+            ) : (
+              <div className="bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-surface-container-low text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
+                    <tr>
+                      <th className="px-6 py-4 text-left">E-Mail</th>
+                      <th className="px-6 py-4 text-left">Verifiziert am</th>
+                      <th className="px-6 py-4 text-left">Gültig bis</th>
+                      <th className="px-6 py-4 text-left">Status</th>
+                      <th className="px-6 py-4 text-right">Aktion</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data?.students.map((s) => {
+                      const expired = new Date(s.expiresAt) < new Date();
+                      const active = !s.revoked && !expired;
+                      return (
+                        <tr key={s.email} className="border-t border-outline-variant/20">
+                          <td className="px-6 py-4 font-body">{s.email}</td>
+                          <td className="px-6 py-4 text-on-surface-variant font-light">
+                            {formatDate(s.verifiedAt.slice(0, 10))}
+                          </td>
+                          <td className="px-6 py-4 text-on-surface-variant font-light">
+                            {formatDate(s.expiresAt.slice(0, 10))}
+                          </td>
+                          <td className="px-6 py-4">
+                            {active ? (
+                              <span className="inline-flex items-center gap-1.5 text-secondary text-xs font-label uppercase tracking-widest">
+                                <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+                                Aktiv
+                              </span>
+                            ) : s.revoked ? (
+                              <span className="inline-flex items-center gap-1.5 text-error text-xs font-label uppercase tracking-widest">
+                                <span className="w-1.5 h-1.5 rounded-full bg-error" />
+                                Widerrufen
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 text-on-surface-variant text-xs font-label uppercase tracking-widest">
+                                <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
+                                Abgelaufen
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            {active ? (
+                              <button
+                                onClick={() => handleStudentAction(s.email, "revoke")}
+                                disabled={studentBusy === s.email}
+                                className="text-xs font-label uppercase tracking-widest text-error hover:opacity-70 disabled:opacity-40 transition"
+                              >
+                                {studentBusy === s.email ? "…" : "Widerrufen"}
+                              </button>
+                            ) : s.revoked ? (
+                              <button
+                                onClick={() => handleStudentAction(s.email, "restore")}
+                                disabled={studentBusy === s.email}
+                                className="text-xs font-label uppercase tracking-widest text-secondary hover:opacity-70 disabled:opacity-40 transition"
+                              >
+                                {studentBusy === s.email ? "…" : "Wiederherstellen"}
+                              </button>
+                            ) : (
+                              <span className="text-[10px] font-label uppercase tracking-widest text-stone-400">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Waitlist Tab */}
+        {tab === "waitlist" && (
+          <div className="space-y-6">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <h2 className="text-2xl font-headline italic mb-1">
+                  Warteliste ({data?.waitlist.length ?? 0})
+                </h2>
+                <p className="text-sm text-on-surface-variant font-light">
+                  E-Mail-Adressen von der Coming-Soon-Seite. Alle wollen benachrichtigt werden, sobald der Eröffnungstermin feststeht.
+                </p>
+              </div>
+              {!!data?.waitlist.length && (
+                <div className="flex items-center gap-3">
+                  {waitlistCopyMsg && (
+                    <span className="text-xs text-secondary font-label uppercase tracking-widest">{waitlistCopyMsg}</span>
+                  )}
+                  <button onClick={handleCopyWaitlistEmails} className="btn-outline">
+                    Alle E-Mails kopieren
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {data?.waitlist.length === 0 ? (
+              <div className="bg-surface-container-low rounded-xl p-12 text-center">
+                <span className="material-symbols-outlined text-5xl text-stone-300 mb-3 block">mail</span>
+                <p className="text-on-surface-variant font-light">Noch keine Eintragungen.</p>
+              </div>
+            ) : (
+              <div className="bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-surface-container-low text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
+                    <tr>
+                      <th className="px-6 py-4 text-left">E-Mail</th>
+                      <th className="px-6 py-4 text-left">Sprache</th>
+                      <th className="px-6 py-4 text-left">Eingetragen am</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data?.waitlist.map((w) => (
+                      <tr key={w.email} className="border-t border-outline-variant/20">
+                        <td className="px-6 py-4 font-body">{w.email}</td>
+                        <td className="px-6 py-4 text-on-surface-variant font-light uppercase text-xs">{w.locale}</td>
+                        <td className="px-6 py-4 text-on-surface-variant font-light">
+                          {formatDateLong(w.createdAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Settings Tab */}
+        {tab === "settings" && (
+          <div className="max-w-xl space-y-8">
+            <div>
+              <h2 className="text-2xl font-headline italic mb-1">Einstellungen</h2>
+              <p className="text-sm text-on-surface-variant font-light">
+                Werte hier werden in Bestätigungs-Mails eingefügt. Änderungen wirken sofort — neu versandte Mails nutzen die aktualisierten Daten.
+              </p>
+            </div>
+
+            <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/40">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="font-headline text-lg italic">WLAN in der Halle</h3>
+                  <p className="text-xs text-on-surface-variant mt-1">
+                    Wird Kunden in der Bestätigungs-Mail angezeigt (DE und EN).
+                  </p>
+                </div>
+                <span className="material-symbols-outlined text-primary">wifi</span>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-2">
+                    SSID (Netzwerkname)
+                  </label>
+                  <input
+                    type="text"
+                    value={wifiDraft.ssid}
+                    onChange={(e) => setWifiDraft((d) => ({ ...d, ssid: e.target.value }))}
+                    maxLength={64}
+                    className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface text-sm font-mono focus:outline-none focus:border-primary"
+                    placeholder="Rückwand Guest"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-2">
+                    Passwort
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showWifiPassword ? "text" : "password"}
+                      value={wifiDraft.password}
+                      onChange={(e) => setWifiDraft((d) => ({ ...d, password: e.target.value }))}
+                      maxLength={128}
+                      className="w-full px-4 py-3 pr-12 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface text-sm font-mono focus:outline-none focus:border-primary"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowWifiPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
+                      title={showWifiPassword ? "Verbergen" : "Anzeigen"}
+                    >
+                      <span className="material-symbols-outlined text-lg">
+                        {showWifiPassword ? "visibility_off" : "visibility"}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {wifiMessage && (
+                  <div
+                    className={`text-xs px-4 py-3 rounded-lg ${
+                      wifiMessage.kind === "success"
+                        ? "bg-secondary-container text-secondary"
+                        : "bg-error-container text-on-error-container"
+                    }`}
+                  >
+                    {wifiMessage.text}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    onClick={handleSaveWifi}
+                    disabled={!wifiDirty || wifiSaving || !wifiDraft.ssid.trim() || !wifiDraft.password.trim()}
+                    className="px-6 py-3 bg-primary text-on-primary rounded-lg font-label text-[10px] tracking-widest uppercase transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {wifiSaving ? "Speichere…" : "Speichern"}
+                  </button>
+                  {wifiDirty && !wifiSaving && (
+                    <button
+                      onClick={() => {
+                        if (data?.settings) {
+                          setWifiDraft({
+                            ssid: data.settings.wifi_ssid,
+                            password: data.settings.wifi_password,
+                          });
+                          setWifiMessage(null);
+                        }
+                      }}
+                      className="px-4 py-3 text-on-surface-variant font-label text-[10px] tracking-widest uppercase hover:text-on-surface"
+                    >
+                      Zurücksetzen
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}

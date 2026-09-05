@@ -1,0 +1,254 @@
+{
+  "metadata": {
+    "title": "RÜCKWAND | Premium Padel Club",
+    "description": "Book your padel court online. 3 double + 1 single court in Ludwigsburg. A curated environment for modern padel excellence."
+  },
+  "newsletter": {
+    "submitting": "Sending…",
+    "success": "You're on the list.",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "errorInvalid": "Please enter a valid email address."
+  },
+  "nav": {
+    "home": "Home",
+    "booking": "Book",
+    "training": "Training",
+    "community": "Community",
+    "bookNow": "Book now"
+  },
+  "footer": {
+    "tagline": "Your premium padel center.",
+    "courts": "3 Double & 1 Single Court in Ludwigsburg.",
+    "email": "concierge@rueckwand-padel.de",
+    "instagram": "Instagram",
+    "concierge": "Concierge Portal",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "imprint": "Imprint",
+    "newsletter": "Newsletter",
+    "emailPlaceholder": "Email address",
+    "copyright": "© {year} RÜCKWAND"
+  },
+  "home": {
+    "hero": {
+      "badge": "Rückwand",
+      "headline": "Where passion meets precision.",
+      "bookCourt": "Book a court",
+      "exploreClub": "Explore the club",
+      "tagline": "Designed for players who expect more. A curated environment for modern padel at the highest level."
+    },
+    "intro": {
+      "label": "Our standard",
+      "headline": "More than a facility. A home for your game.",
+      "text": "We built Rückwand for everyone who doesn't just play padel — they live it. Four tournament-grade courts — three doubles and one single — thoughtful architecture and a service that leaves nothing to chance, so you can focus on what truly matters: your game.",
+      "stats": {
+        "courts": "Premium Courts",
+        "hours": "Open",
+        "days": "Days / Week"
+      }
+    },
+    "courts": {
+      "title": "Our Courts",
+      "subtitle": "Double & Single Courts",
+      "double": {
+        "available": "3 courts available",
+        "title": "Double Courts",
+        "feature1": "Perfect for up to 4 players",
+        "feature2": "Professional lighting",
+        "feature3": "Open 08:00 – 24:00",
+        "priceFrom": "from",
+        "perHour": "/ hour",
+        "bookNow": "Book now"
+      },
+      "single": {
+        "available": "1 court available",
+        "title": "Single Court",
+        "description": "Ideal for 2 players. Compact court with first-class equipment.",
+        "priceFrom": "from",
+        "perHour": "/ hour",
+        "bookNow": "Book now"
+      }
+    },
+    "bento": {
+      "courts": {
+        "label": "Architecture",
+        "title": "The Courts",
+        "description": "World-class playing surfaces, framed in minimalist design.",
+        "link": "Explore spaces"
+      },
+      "lounge": {
+        "label": "Community",
+        "title": "Lounge & Rooftop",
+        "link": "Arrive & stay"
+      },
+      "bistro": {
+        "title": "The Bistro",
+        "link": "See menu"
+      },
+      "training": {
+        "title": "Training",
+        "link": "Book a coach"
+      }
+    },
+    "newsletter": {
+      "badge": "Stay in the loop",
+      "headline": "Your advantage starts before the serve.",
+      "description": "Get exclusive tournament invitations, training tips from our coaches and offers before they go public — straight to your inbox.",
+      "emailPlaceholder": "Your email address",
+      "button": "Subscribe",
+      "disclaimer": "No spam. Only the essentials. Unsubscribe anytime."
+    }
+  },
+  "booking": {
+    "hero": {
+      "badge": "Reservation",
+      "headline": "Your court.",
+      "headlineAccent": "Your moment.",
+      "description": "Choose date, court and time slot for your booking. Real-time availability across all 4 courts."
+    },
+    "datePicker": {
+      "label": "Date",
+      "today": "Today"
+    },
+    "timeSlots": {
+      "title": "Availability",
+      "subtitle": "Choose courts and time slots. You can book multiple courts at the same time.",
+      "legend": {
+        "free": "Free",
+        "booked": "Booked",
+        "selected": "Selected"
+      },
+      "court": {
+        "priceFrom": "from {price} / hour"
+      },
+      "status": {
+        "booked": "booked",
+        "past": "past"
+      }
+    },
+    "scrollHint": {
+      "label": "Jump to summary"
+    },
+    "summary": {
+      "emptyTitle": "Secure your court",
+      "emptyDescription": "Choose courts and time slots to continue.",
+      "emptyState": "No slot selected",
+      "title": "Secure your court",
+      "titlePlural": "Secure your courts",
+      "dateLabel": "Date",
+      "remove": "Remove",
+      "hours": "h",
+      "courtLabel": "{count, plural, =1 {# court} other {# courts}}",
+      "vat": "incl. VAT (19%)",
+      "investment": "Total",
+      "confirmButton": "CONFIRM RESERVATION",
+      "secureNote": "Secure checkout · Encrypted"
+    }
+  },
+  "checkout": {
+    "emptyState": {
+      "title": "No booking data",
+      "description": "Please choose a court and time slot first.",
+      "button": "To booking"
+    },
+    "backButton": "Back to booking",
+    "badge": "Secure Checkout",
+    "headline": "Complete your",
+    "headlineAccent": "reservation.",
+    "form": {
+      "title": "Personal details",
+      "nameLabel": "Full name *",
+      "namePlaceholder": "John Smith",
+      "emailLabel": "Email address *",
+      "emailPlaceholder": "john@example.com",
+      "emailErrorInvalidFormat": "Please enter a valid email address.",
+      "emailErrorInvalidTld": "The ending doesn't look right. Did you mean {suggestion}?",
+      "emailWarningDomainTypo": "Heads up: did you mean {suggestion}?",
+      "emailSuggestionApply": "Yes, use this",
+      "emailSuggestionDismiss": "No, it's correct",
+      "emailBlockedSubmit": "Please double-check your email address before continuing.",
+      "studentTitle": "Student discount",
+      "studentSubtitle": "{percent}% off your booking Mon–Fri between 08:00 and 12:00.",
+      "studentToggle": "I'm a student",
+      "studentUploadLabel": "Upload student ID",
+      "studentUploadHint": "Upload a photo of your student or school ID — we only verify it's a valid image file and do not store it. Once accepted, the discount applies to this email for one year.",
+      "studentVerifying": "Checking…",
+      "studentVerifiedNow": "Verified. Your discount will be applied automatically.",
+      "studentAlreadyVerified": "This email is verified as a student.",
+      "studentEmailFirst": "Please enter your email address first.",
+      "studentUploadError": "Upload failed. Please try again.",
+      "studentPrivacyNote": "File is not stored · Verification valid for 1 year",
+      "phoneLabel": "Phone (optional)",
+      "phonePlaceholder": "+49 123 456 789",
+      "errorDefault": "Checkout failed",
+      "processing": "Processing…",
+      "submit": "SECURE PAYMENT — {price}",
+      "secureNote": "Concierge Secure Checkout · Stripe Encrypted"
+    },
+    "summary": {
+      "title": "Reservation Summary",
+      "dateLabel": "Date",
+      "vat": "incl. VAT (19%)",
+      "investment": "Total",
+      "studentDiscount": "Student discount ({percent}%)",
+      "note": "Secure payment · Invoice by email via Easybill"
+    }
+  },
+  "success": {
+    "loading": "Confirming your reservation…",
+    "badge": "Reservation confirmed",
+    "headline": "Welcome to the",
+    "headlineAccent": "court.",
+    "description": "Thank you for your booking. You will shortly receive a confirmation email with your invoice and access code.",
+    "accessCode": {
+      "label": "Facility access code",
+      "note": "Valid on the booking day · Please don't share your code"
+    },
+    "booking": {
+      "id": "Booking ID",
+      "court": "Court",
+      "timeSlot": "Time slot",
+      "price": "Price",
+      "status": "Status",
+      "confirmed": "Confirmed"
+    },
+    "total": "Total",
+    "newBooking": "New booking",
+    "home": "To home"
+  },
+  "my": {
+    "loading": "Loading your bookings…",
+    "errorTitle": "Access not possible",
+    "errors": {
+      "invalidLink": "Invalid link.",
+      "expired": "Access denied. This link is invalid or expired.",
+      "loadFailed": "Failed to load bookings.",
+      "cancelFailed": "Cancellation failed.",
+      "cancelError": "Error while cancelling."
+    },
+    "homeButton": "To home",
+    "hero": {
+      "badge": "My bookings",
+      "headline": "Welcome back."
+    },
+    "confirmCancel": "Are you sure you want to cancel this booking?",
+    "cancelSuccess": "Booking cancelled successfully. You will receive a confirmation by email.",
+    "emptyTitle": "No active bookings",
+    "emptyDescription": "You currently have no bookings.",
+    "bookNow": "Book now",
+    "upcoming": "Upcoming bookings ({count})",
+    "past": "Past bookings ({count})",
+    "today": "Today",
+    "accessCode": "Access code",
+    "cancel": "Cancel",
+    "cancelling": "Cancelling…",
+    "notCancellable": "Not cancellable",
+    "id": "ID",
+    "newBooking": "New booking"
+  },
+  "language": {
+    "switcher": "Language",
+    "de": "Deutsch",
+    "en": "English"
+  }
+}

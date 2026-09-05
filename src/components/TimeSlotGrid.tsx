@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { TIME_SLOTS, formatTime, formatPrice, getPriceForHour } from "@/lib/constants";
+import { useTranslations } from "next-intl";
 
 export interface Selection {
   courtId: string;
@@ -35,11 +35,11 @@ export default function TimeSlotGrid({
   selections,
   onSlotSelect,
 }: TimeSlotGridProps) {
-  const doppelCourts = courts.filter((c) => c.type === "double");
-  const einzelCourts = courts.filter((c) => c.type === "standard");
-  const [activeTab, setActiveTab] = useState<"double" | "standard">("double");
-
-  const activeCourts = activeTab === "double" ? doppelCourts : einzelCourts;
+  const t = useTranslations("booking.timeSlots");
+  // Server already filters out hidden courts via /api/bookings/courts, so we
+  // just take what we get and display them in the order the API returned
+  // (sorted by type then name).
+  const activeCourts = courts;
 
   const isBooked = (courtId: string, hour: number) => {
     return bookedSlots.some(
@@ -77,62 +77,32 @@ export default function TimeSlotGrid({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h2 className="text-2xl font-headline italic tracking-tight mb-1">
-            Verfügbarkeit
+            {t("title")}
           </h2>
           <p className="text-on-surface-variant font-light text-sm">
-            Wähle Courts und Zeitslots aus. Du kannst mehrere Courts gleichzeitig buchen.
+            {t("subtitle")}
           </p>
         </div>
         <div className="flex gap-3">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-primary-container" />
             <span className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
-              Frei
+              {t("legend.free")}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-stone-300" />
             <span className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
-              Belegt
+              {t("legend.booked")}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-primary" />
             <span className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
-              Gewählt
+              {t("legend.selected")}
             </span>
           </div>
         </div>
-      </div>
-
-      {/* Court Type Tabs */}
-      <div className="flex gap-2 mb-8">
-        <button
-          onClick={() => setActiveTab("double")}
-          className={`flex-1 py-4 px-6 rounded-xl font-label text-xs tracking-widest uppercase transition-all ${
-            activeTab === "double"
-              ? "bg-primary text-on-primary shadow-md"
-              : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"
-          }`}
-        >
-          <span className="block font-headline text-lg italic normal-case tracking-normal mb-0.5">
-            Doppel Courts
-          </span>
-          <span className="opacity-70">{doppelCourts.length} Courts &middot; bis zu 4 Spieler</span>
-        </button>
-        <button
-          onClick={() => setActiveTab("standard")}
-          className={`flex-1 py-4 px-6 rounded-xl font-label text-xs tracking-widest uppercase transition-all ${
-            activeTab === "standard"
-              ? "bg-primary text-on-primary shadow-md"
-              : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"
-          }`}
-        >
-          <span className="block font-headline text-lg italic normal-case tracking-normal mb-0.5">
-            Einzel Courts
-          </span>
-          <span className="opacity-70">{einzelCourts.length} Courts &middot; bis zu 2 Spieler</span>
-        </button>
       </div>
 
       {/* Court Cards with Time Slots */}
@@ -158,7 +128,7 @@ export default function TimeSlotGrid({
                   <div>
                     <h3 className="font-headline text-lg italic">{court.name}</h3>
                     <p className="text-[10px] font-label tracking-widest uppercase text-on-surface-variant">
-                      ab {formatPrice(getPriceForHour(court.type, 8))} / Stunde
+                      {t("court.priceFrom", { price: formatPrice(getPriceForHour(court.type, 8)) })}
                     </p>
                   </div>
                 </div>
@@ -191,7 +161,7 @@ export default function TimeSlotGrid({
                             ? "bg-stone-200 text-stone-400 cursor-not-allowed"
                             : past
                             ? "bg-stone-100 text-stone-300 cursor-not-allowed"
-                            : "bg-white hover:bg-primary-container/50 hover:shadow-sm cursor-pointer text-on-surface"
+                            : "bg-surface-container-lowest hover:bg-primary-container/50 hover:shadow-sm cursor-pointer text-on-surface"
                         }`}
                       >
                         <span className="text-sm font-body font-medium">
@@ -200,7 +170,7 @@ export default function TimeSlotGrid({
                         <span className={`text-[10px] font-label mt-0.5 ${
                           selected ? "text-on-primary/80" : booked ? "line-through" : past ? "" : "text-on-surface-variant"
                         }`}>
-                          {booked ? "belegt" : past ? "vorbei" : formatPrice(price)}
+                          {booked ? t("status.booked") : past ? t("status.past") : formatPrice(price)}
                         </span>
                       </button>
                     );

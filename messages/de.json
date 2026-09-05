@@ -1,0 +1,254 @@
+{
+  "metadata": {
+    "title": "RÜCKWAND | Premium Padel Club",
+    "description": "Buche deinen Padel Court online. 3 Doppel & 1 Einzel Court in Ludwigsburg. Eine kuratierte Umgebung für moderne Padel-Exzellenz."
+  },
+  "newsletter": {
+    "submitting": "Wird gesendet…",
+    "success": "Du bist dabei.",
+    "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuch es erneut.",
+    "errorInvalid": "Bitte gib eine gültige E-Mail-Adresse ein."
+  },
+  "nav": {
+    "home": "Home",
+    "booking": "Buchen",
+    "training": "Training",
+    "community": "Community",
+    "bookNow": "Jetzt buchen"
+  },
+  "footer": {
+    "tagline": "Dein Premium Padel Center.",
+    "courts": "3 Doppel & 1 Einzel Court in Ludwigsburg.",
+    "email": "concierge@rueckwand-padel.de",
+    "instagram": "Instagram",
+    "concierge": "Concierge Portal",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "imprint": "Impressum",
+    "newsletter": "Newsletter",
+    "emailPlaceholder": "E-Mail Adresse",
+    "copyright": "© {year} RÜCKWAND"
+  },
+  "home": {
+    "hero": {
+      "badge": "Rückwand",
+      "headline": "Wo Leidenschaft auf Präzision trifft.",
+      "bookCourt": "Court buchen",
+      "exploreClub": "Anlage entdecken",
+      "tagline": "Konzipiert für Spieler, die mehr erwarten. Eine kuratierte Umgebung für modernes Padel auf höchstem Niveau."
+    },
+    "intro": {
+      "label": "Unser Anspruch",
+      "headline": "Mehr als eine Anlage. Eine Heimat für dein Spiel.",
+      "text": "Wir haben Rückwand für alle geschaffen, die Padel nicht nur spielen, sondern leben. Vier Courts auf Turnierniveau – drei Doppel und ein Einzel – durchdachte Architektur und ein Service, der keine Wünsche offen lässt. Damit du dich auf das konzentrieren kannst, was wirklich zählt: dein Spiel.",
+      "stats": {
+        "courts": "Premium Courts",
+        "hours": "Geöffnet",
+        "days": "Tage / Woche"
+      }
+    },
+    "courts": {
+      "title": "Unsere Courts",
+      "subtitle": "Doppel & Einzel Courts",
+      "double": {
+        "available": "3 Courts verfügbar",
+        "title": "Doppel Courts",
+        "feature1": "Perfekt für bis zu 4 Spieler",
+        "feature2": "Professionelle Beleuchtung",
+        "feature3": "Öffnungszeiten 08:00 – 24:00 Uhr",
+        "priceFrom": "ab",
+        "perHour": "/ Stunde",
+        "bookNow": "Jetzt buchen"
+      },
+      "single": {
+        "available": "1 Court verfügbar",
+        "title": "Einzel Court",
+        "description": "Ideal für 2 Spieler. Kompakter Court mit erstklassiger Ausstattung.",
+        "priceFrom": "ab",
+        "perHour": "/ Stunde",
+        "bookNow": "Jetzt buchen"
+      }
+    },
+    "bento": {
+      "courts": {
+        "label": "Architektur",
+        "title": "Die Courts",
+        "description": "Weltklasse-Spielflächen, eingefasst in minimalistischem Design.",
+        "link": "Räume entdecken"
+      },
+      "lounge": {
+        "label": "Community",
+        "title": "Lounge & Dachterrasse",
+        "link": "Ankommen & verweilen"
+      },
+      "bistro": {
+        "title": "Das Bistro",
+        "link": "Zur Karte"
+      },
+      "training": {
+        "title": "Training",
+        "link": "Trainer buchen"
+      }
+    },
+    "newsletter": {
+      "badge": "Immer am Ball",
+      "headline": "Dein Vorteil beginnt vor dem Aufschlag.",
+      "description": "Erhalte exklusive Turniereinladungen, Trainingstipps unserer Coaches und Angebote, bevor sie online gehen – direkt in dein Postfach.",
+      "emailPlaceholder": "Deine E-Mail Adresse",
+      "button": "Anmelden",
+      "disclaimer": "Kein Spam. Nur das Wichtigste. Jederzeit abmeldbar."
+    }
+  },
+  "booking": {
+    "hero": {
+      "badge": "Reservierung",
+      "headline": "Dein Court.",
+      "headlineAccent": "Dein Moment.",
+      "description": "Wähle Datum, Court und Zeitslot für deine Buchung. Echtzeit-Verfügbarkeit aller 4 Courts."
+    },
+    "datePicker": {
+      "label": "Datum",
+      "today": "Heute"
+    },
+    "timeSlots": {
+      "title": "Verfügbarkeit",
+      "subtitle": "Wähle Courts und Zeitslots aus. Du kannst mehrere Courts gleichzeitig buchen.",
+      "legend": {
+        "free": "Frei",
+        "booked": "Belegt",
+        "selected": "Gewählt"
+      },
+      "court": {
+        "priceFrom": "ab {price} / Stunde"
+      },
+      "status": {
+        "booked": "belegt",
+        "past": "vorbei"
+      }
+    },
+    "scrollHint": {
+      "label": "Zur Zusammenfassung"
+    },
+    "summary": {
+      "emptyTitle": "Court sichern",
+      "emptyDescription": "Wähle Courts und Zeitslots aus, um fortzufahren.",
+      "emptyState": "Kein Slot ausgewählt",
+      "title": "Court sichern",
+      "titlePlural": "Courts sichern",
+      "dateLabel": "Datum",
+      "remove": "Entfernen",
+      "hours": "h",
+      "courtLabel": "{count, plural, =1 {# Court} other {# Courts}}",
+      "vat": "inkl. MwSt. (19%)",
+      "investment": "Gesamt",
+      "confirmButton": "RESERVIERUNG BESTÄTIGEN",
+      "secureNote": "Sichere Bezahlung · Verschlüsselt"
+    }
+  },
+  "checkout": {
+    "emptyState": {
+      "title": "Keine Buchungsdaten",
+      "description": "Bitte wähle zuerst einen Court und Zeitslot aus.",
+      "button": "Zur Buchung"
+    },
+    "backButton": "Zurück zur Buchung",
+    "badge": "Sicherer Checkout",
+    "headline": "Deine Reservierung",
+    "headlineAccent": "abschließen.",
+    "form": {
+      "title": "Persönliche Daten",
+      "nameLabel": "Vollständiger Name *",
+      "namePlaceholder": "Max Mustermann",
+      "emailLabel": "E-Mail Adresse *",
+      "emailPlaceholder": "max@beispiel.de",
+      "emailErrorInvalidFormat": "Bitte gib eine gültige E-Mail-Adresse ein.",
+      "emailErrorInvalidTld": "Die Endung sieht nicht richtig aus. Meintest du {suggestion}?",
+      "emailWarningDomainTypo": "Hinweis: Hast du {suggestion} gemeint?",
+      "emailSuggestionApply": "Ja, übernehmen",
+      "emailSuggestionDismiss": "Nein, passt so",
+      "emailBlockedSubmit": "Bitte überprüfe deine E-Mail-Adresse, bevor du fortfährst.",
+      "phoneLabel": "Telefon (optional)",
+      "phonePlaceholder": "+49 123 456 789",
+      "studentTitle": "Schüler- & Studentenrabatt",
+      "studentSubtitle": "{percent}% Rabatt auf deine Buchung Mo–Fr von 08:00 bis 12:00 Uhr.",
+      "studentToggle": "Ich bin Student/Schüler",
+      "studentUploadLabel": "Ausweis hochladen",
+      "studentUploadHint": "Lade ein Foto deines Schüler- oder Studentenausweises hoch — wir prüfen nur, dass es ein gültiges Bild ist und speichern die Datei nicht. Danach gilt der Rabatt 1 Jahr für diese E-Mail-Adresse.",
+      "studentVerifying": "Wird geprüft…",
+      "studentVerifiedNow": "Verifiziert. Der Rabatt wird automatisch abgezogen.",
+      "studentAlreadyVerified": "Diese E-Mail ist als Student verifiziert.",
+      "studentEmailFirst": "Bitte gib zuerst deine E-Mail-Adresse ein.",
+      "studentUploadError": "Upload fehlgeschlagen. Bitte erneut versuchen.",
+      "studentPrivacyNote": "Datei wird nicht gespeichert · Verifizierung gilt 1 Jahr",
+      "errorDefault": "Checkout fehlgeschlagen",
+      "processing": "Wird verarbeitet…",
+      "submit": "SICHER BEZAHLEN — {price}",
+      "secureNote": "Concierge Secure Checkout · Stripe verschlüsselt"
+    },
+    "summary": {
+      "title": "Reservierungsübersicht",
+      "dateLabel": "Datum",
+      "vat": "inkl. MwSt. (19%)",
+      "investment": "Gesamt",
+      "studentDiscount": "Studi-Rabatt ({percent}%)",
+      "note": "Sichere Zahlung · Rechnung per E-Mail via Easybill"
+    }
+  },
+  "success": {
+    "loading": "Reservierung wird bestätigt…",
+    "badge": "Reservierung bestätigt",
+    "headline": "Willkommen auf dem",
+    "headlineAccent": "Court.",
+    "description": "Vielen Dank für deine Buchung. Du erhältst in Kürze eine Bestätigungsmail mit deiner Rechnung und deinem Zugangscode.",
+    "accessCode": {
+      "label": "Zugangscode Halle",
+      "note": "Gültig am Buchungstag · Bitte Code nicht weitergeben"
+    },
+    "booking": {
+      "id": "Buchungsnummer",
+      "court": "Court",
+      "timeSlot": "Zeitfenster",
+      "price": "Preis",
+      "status": "Status",
+      "confirmed": "Bestätigt"
+    },
+    "total": "Gesamt",
+    "newBooking": "Weitere Buchung",
+    "home": "Zur Startseite"
+  },
+  "my": {
+    "loading": "Buchungen werden geladen…",
+    "errorTitle": "Zugriff nicht möglich",
+    "errors": {
+      "invalidLink": "Ungültiger Link.",
+      "expired": "Zugriff verweigert. Der Link ist ungültig oder abgelaufen.",
+      "loadFailed": "Fehler beim Laden der Buchungen.",
+      "cancelFailed": "Stornierung fehlgeschlagen.",
+      "cancelError": "Fehler bei der Stornierung."
+    },
+    "homeButton": "Zur Startseite",
+    "hero": {
+      "badge": "Meine Buchungen",
+      "headline": "Willkommen zurück."
+    },
+    "confirmCancel": "Möchtest du diese Buchung wirklich stornieren?",
+    "cancelSuccess": "Buchung erfolgreich storniert. Du erhältst eine Bestätigung per E-Mail.",
+    "emptyTitle": "Keine aktiven Buchungen",
+    "emptyDescription": "Du hast aktuell keine Buchungen.",
+    "bookNow": "Jetzt buchen",
+    "upcoming": "Kommende Buchungen ({count})",
+    "past": "Vergangene Buchungen ({count})",
+    "today": "Heute",
+    "accessCode": "Zugangscode",
+    "cancel": "Stornieren",
+    "cancelling": "Wird storniert…",
+    "notCancellable": "Nicht stornierbar",
+    "id": "ID",
+    "newBooking": "Neue Buchung"
+  },
+  "language": {
+    "switcher": "Sprache",
+    "de": "Deutsch",
+    "en": "English"
+  }
+}

@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { OPENING_HOUR, CLOSING_HOUR, calculateTotalPrice } from "@/lib/constants";
+import {
+  STUDENT_DISCOUNT_PERCENT,
+  applyStudentDiscount,
+  isBookingDiscountEligible,
+} from "@/lib/student-discount";
 
 interface CheckoutItem {
   courtId: string;
@@ -15,7 +20,8 @@ interface CheckoutItem {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { date, items, customerName, customerEmail, customerPhone } = body;
+    const { date, items, customerName, customerEmail, customerPhone, locale } = body;
+    const checkoutLocale = locale === "en" ? "en" : "de";
 
     // Support both old single-item format and new multi-item format
     const checkoutItems: CheckoutItem[] = items
@@ -49,9 +55,12 @@ export async function POST(request: NextRequest) {
 
     const bookingDate = new Date(date + "T00:00:00.000Z");
 
-    // Parallel: fetch all courts + check all availabilities at once
+    // Parallel: fetch all courts + check all availabilities + student
+    // status at once. Student lookup is authoritative — never trust the
+    // client-sent flag: re-check the verification table here.
+    const normalizedEmail = customerEmail.trim().toLowerCase();
     const courtIds = checkoutItems.map((i) => i.courtId);
-    const [courts, existingBookings] = await Promise.all([
+    const [courts, existingBookings, studentRecord] = await Promise.all([
       prisma.court.findMany({ where: { id: { in: courtIds } } }),
       prisma.booking.findMany({
         where: {
@@ -61,7 +70,16 @@ export async function POST(request: NextRequest) {
         },
         select: { courtId: true, startTime: true, endTime: true, status: true },
       }),
+      prisma.studentVerification.findUnique({ where: { email: normalizedEmail } }),
     ]);
+
+    const studentVerified =
+      !!studentRecord && !studentRecord.revoked && studentRecord.expiresAt > new Date();
+    const slotsEligible = isBookingDiscountEligible(
+      date,
+      checkoutItems.map((i) => ({ startTime: i.startTime, endTime: i.endTime }))
+    );
+    const discountApplies = studentVerified && slotsEligible;
 
     // Validate courts exist and prices match
     for (const item of checkoutItems) {
@@ -87,11 +105,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create all bookings in parallel
+    // Create all bookings in parallel. Persist the actually-charged price
+    // (after student discount, if any) so refunds / dashboards never need
+    // to recompute it from rules that may shift later.
     const bookings = await Promise.all(
       checkoutItems.map((item) => {
         const court = courts.find((c) => c.id === item.courtId)!;
-        const expectedPrice = calculateTotalPrice(court.type, item.startTime, item.endTime);
+        const fullPrice = calculateTotalPrice(court.type, item.startTime, item.endTime);
+        const finalPrice = discountApplies ? applyStudentDiscount(fullPrice) : fullPrice;
         return prisma.booking.create({
           data: {
             courtId: item.courtId,
@@ -101,7 +122,7 @@ export async function POST(request: NextRequest) {
             customerName,
             customerEmail,
             customerPhone: customerPhone || null,
-            totalPrice: expectedPrice,
+            totalPrice: finalPrice,
             status: "pending",
           },
         });
@@ -110,19 +131,26 @@ export async function POST(request: NextRequest) {
 
     const bookingIds = bookings.map((b) => b.id);
 
-    // Build Stripe line items
+    // Build Stripe line items. When a student discount applies we reduce
+    // the unit_amount directly and append a tag to the line description —
+    // this is simpler than Stripe coupons and the customer sees the
+    // discounted price on the Stripe page, not "−20%" at the bottom.
     const lineItems = checkoutItems.map((item) => {
       const court = courts.find((c) => c.id === item.courtId)!;
-      const expectedPrice = calculateTotalPrice(court.type, item.startTime, item.endTime);
+      const fullPrice = calculateTotalPrice(court.type, item.startTime, item.endTime);
+      const finalPrice = discountApplies ? applyStudentDiscount(fullPrice) : fullPrice;
       const hours = item.endTime - item.startTime;
+      const baseDesc = `${date} | ${item.startTime}:00 - ${item.endTime}:00 Uhr | ${hours} Stunde(n)`;
       return {
         price_data: {
           currency: "eur" as const,
           product_data: {
             name: `Padel Court: ${item.courtName}`,
-            description: `${date} | ${item.startTime}:00 - ${item.endTime}:00 Uhr | ${hours} Stunde(n)`,
+            description: discountApplies
+              ? `${baseDesc} | Studi-Rabatt -${STUDENT_DISCOUNT_PERCENT}%`
+              : baseDesc,
           },
-          unit_amount: Math.round(expectedPrice * 100),
+          unit_amount: Math.round(finalPrice * 100),
         },
         quantity: 1,
       };
@@ -138,9 +166,11 @@ export async function POST(request: NextRequest) {
         bookingIds: bookingIds.join(","),
         date,
         itemCount: checkoutItems.length.toString(),
+        locale: checkoutLocale,
+        studentDiscount: discountApplies ? "true" : "false",
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/booking`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}${checkoutLocale === "en" ? "/en" : ""}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}${checkoutLocale === "en" ? "/en" : ""}/booking`,
     });
 
     return NextResponse.json({ url: session.url });

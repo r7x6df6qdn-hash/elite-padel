@@ -33,14 +33,13 @@ const COPY = {
     floorplanLabel: "Unser Grundriss",
     floorplanHeadline: "Modern, großzügig, durchdacht.",
     floorplanIntro:
-      "3 Doppel- und 1 Einzelcourt, ein eigener Gastro- & Loungebereich und eine Dachterrasse zum Verweilen nach dem Match.",
+      "3 Doppel- und 1 Einzelcourt, ein eigener Gastro- & Loungebereich und eine Outdoor-Lounge zum Verweilen nach dem Match.",
     amenities: [
       { icon: "sports_tennis", title: "3 Doppel Padel Courts" },
       { icon: "sports_tennis", title: "1 Single Padel Court" },
       { icon: "local_bar", title: "Gastro & Lounge Bereich", text: "Mit Bar & Sitzplätzen" },
-      { icon: "stairs", title: "Zugang zur Dachterrasse" },
       { icon: "checkroom", title: "Umkleiden & Sanitärbereich", text: "Unter der Gastro" },
-      { icon: "deck", title: "Outdoor Lounge auf der Dachterrasse", text: "Mit Sitzbereich & Pflanzen" },
+      { icon: "deck", title: "Outdoor-Lounge", text: "Mit Sitzbereich & Pflanzen" },
     ],
 
     featuresLabel: "Was entsteht",
@@ -111,14 +110,13 @@ const COPY = {
     floorplanLabel: "Our floor plan",
     floorplanHeadline: "Modern, spacious, thought through.",
     floorplanIntro:
-      "3 double and 1 single court, our own bar & lounge area, and a roof terrace to hang out on after the match.",
+      "3 double and 1 single court, our own bar & lounge area, and an outdoor lounge to hang out on after the match.",
     amenities: [
       { icon: "sports_tennis", title: "3 double padel courts" },
       { icon: "sports_tennis", title: "1 single padel court" },
       { icon: "local_bar", title: "Bar & lounge area", text: "With seating" },
-      { icon: "stairs", title: "Roof terrace access" },
       { icon: "checkroom", title: "Changing rooms & showers", text: "Below the bar area" },
-      { icon: "deck", title: "Outdoor lounge on the roof terrace", text: "With seating & plants" },
+      { icon: "deck", title: "Outdoor lounge", text: "With seating & plants" },
     ],
 
     featuresLabel: "What's coming",
@@ -247,7 +245,7 @@ function WaitlistForm({ t, locale }: { t: (typeof COPY)[Locale]; locale: Locale 
       ) : (
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col sm:flex-row gap-3 bg-surface-container-lowest rounded-2xl p-3 editorial-shadow"
+          className="flex flex-col sm:flex-row gap-3 bg-surface-container-lowest rounded-2xl p-3 editorial-shadow transition-shadow duration-300 focus-within:ring-2 focus-within:ring-primary-fixed-dim"
         >
           <input
             type="email"
@@ -264,7 +262,7 @@ function WaitlistForm({ t, locale }: { t: (typeof COPY)[Locale]; locale: Locale 
           <button
             type="submit"
             disabled={status === "loading"}
-            className="btn-primary whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary whitespace-nowrap hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {status === "loading" ? t.submitting : t.submit}
           </button>
@@ -326,65 +324,70 @@ export default function ComingSoonPage() {
         </div>
       </header>
 
-      {/* Hero — real exterior render as full-bleed background */}
-      <section className="relative flex flex-col items-center justify-center text-center px-6 py-20 md:py-28 min-h-[95vh] overflow-hidden">
+      {/* Hero — real exterior render as full-bleed background. Content sits
+          bottom-left, not centered in a card: the photo is dark enough on
+          its own now to carry the text directly, and an asymmetric block
+          reads as art-directed rather than a stock landing-page layout. */}
+      <section className="relative flex flex-col justify-end px-6 md:px-16 pt-32 pb-20 md:pb-24 min-h-[95vh] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
             src="/aussenansicht.jpg"
             alt={`${SITE_NAME} building exterior`}
-            className="w-full h-full object-cover object-[20%_center] md:object-center"
+            className="w-full h-full object-cover object-[2%_center] md:object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-stone-900/80 via-stone-900/70 to-stone-900/90" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(20,14,12,0.4)_0%,rgba(20,14,12,0)_65%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(23,17,15,0.95)_0%,rgba(23,17,15,0.9)_48%,rgba(23,17,15,0.4)_75%,rgba(23,17,15,0.05)_100%)]" />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center">
+        <div className="relative z-10 max-w-2xl">
           {/* No second logo mark here — the photo already carries the brand
               (facade lettering, flags, entrance sign) and the header above
               now carries the persistent logo, so a third mark would just
               compete with both. */}
           <span className="sr-only">{SITE_NAME} – Urban Padel Club</span>
 
-          <span className="inline-flex items-center gap-2 text-white/70 mb-8 max-w-[260px] sm:max-w-none">
+          <span className="inline-flex items-center gap-2 text-white/70 mb-6">
             <span className="material-symbols-outlined text-sm shrink-0">location_on</span>
-            <span className="font-label text-[11px] tracking-[0.3em] uppercase text-left sm:text-center">
+            <span className="font-label text-[11px] tracking-[0.3em] uppercase">
               {t.addressPill}
             </span>
           </span>
 
-          <div className="bg-stone-900/40 backdrop-blur-xl border border-white/10 rounded-2xl px-8 py-10 md:px-16 md:py-14 flex flex-col items-center editorial-shadow">
-            <h1 className="text-5xl md:text-7xl font-headline italic leading-[1.1] tracking-tighter text-white mb-6">
-              {t.headline}
-            </h1>
+          <h1 className="text-5xl md:text-7xl font-headline italic leading-[1.05] tracking-tighter text-white mb-5">
+            {t.headline}
+          </h1>
 
-            <span className="inline-block bg-primary text-on-primary px-4 py-1.5 rounded-full font-label text-[10px] tracking-[0.2em] uppercase mb-6">
-              {t.comingSoon}
-            </span>
+          <span className="inline-block font-label text-[11px] tracking-[0.3em] uppercase text-primary-fixed-dim mb-6 pb-1 border-b border-primary-fixed-dim/40">
+            {t.comingSoon}
+          </span>
 
-            <p className="text-lg font-body font-light text-white mb-3 max-w-lg">
-              {t.subheadline}
-            </p>
+          <p className="text-lg font-body font-light text-white mb-3 max-w-lg">
+            {t.subheadline}
+          </p>
 
-            <p className="text-sm font-body font-light text-stone-300 leading-relaxed max-w-md">
-              {t.description}
-            </p>
-          </div>
+          <p className="text-sm font-body font-light text-stone-300 leading-relaxed max-w-md">
+            {t.description}
+          </p>
+        </div>
 
-          <div className="mt-14 flex flex-col items-center gap-3 text-white/70 animate-bounce-y">
-            <span className="font-label text-[10px] tracking-[0.3em] uppercase">{t.scroll}</span>
-            <span className="w-px h-10 bg-white/40" />
-          </div>
+        <div className="relative z-10 hidden md:flex mt-14 items-center gap-3 text-white/60 animate-bounce-y">
+          <span className="font-label text-[10px] tracking-[0.3em] uppercase">{t.scroll}</span>
+          <span className="w-10 h-px bg-white/40" />
         </div>
       </section>
 
       {/* Waitlist signup — right after the hero, since capturing sign-ups
-          before opening is the most important thing this page can do. */}
-      <section className="px-6 md:px-12 py-20 md:py-24 bg-surface-container-lowest">
+          before opening is the most important thing this page can do. A
+          solid primary-color break (the only one on the page) makes this
+          the visual peak of the scroll, not just another cream section. */}
+      <section className="px-6 md:px-12 py-20 md:py-28 bg-primary text-on-primary">
         <Reveal className="max-w-2xl mx-auto text-center">
+          <span className="material-symbols-outlined text-4xl mb-5 block text-primary-fixed-dim">
+            mail
+          </span>
           <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight mb-4">
             {t.formTitle}
           </h2>
-          <p className="text-on-surface-variant font-light leading-relaxed max-w-md mx-auto mb-10">
+          <p className="text-white/80 font-light leading-relaxed max-w-md mx-auto mb-10">
             {t.formHint}
           </p>
           <WaitlistForm t={t} locale={locale} />

@@ -10,6 +10,7 @@ import {
   VENUE_ADDRESS,
   GOOGLE_MAPS_URL,
   APPLE_MAPS_URL,
+  WHATSAPP_GROUP_URL,
 } from "@/lib/brand";
 import Reveal from "@/components/Reveal";
 import Logo from "@/components/Logo";
@@ -72,6 +73,8 @@ const COPY = {
 
     formTitle: "Verpasse nicht unser Opening Event",
     formHint: "Trag dich ein und wir melden uns, sobald der Termin feststeht.",
+    orDivider: "oder",
+    whatsappCta: "Tritt unserer WhatsApp-Community bei",
     emailPlaceholder: "deine@email.de",
     submit: "Eintragen",
     submitting: "Wird gesendet…",
@@ -141,6 +144,8 @@ const COPY = {
 
     formTitle: "Don't miss our opening event",
     formHint: "Sign up and we'll let you know as soon as the date is set.",
+    orDivider: "or",
+    whatsappCta: "Join our WhatsApp community",
     emailPlaceholder: "you@email.com",
     submit: "Sign up",
     submitting: "Sending…",
@@ -366,6 +371,26 @@ export default function ComingSoonPage() {
             {t.formHint}
           </p>
           <WaitlistForm t={t} locale={locale} />
+
+          <div className="flex items-center gap-4 max-w-xs mx-auto my-8">
+            <span className="h-px flex-1 bg-white/20" />
+            <span className="font-label text-[10px] tracking-[0.3em] uppercase text-white/50">
+              {t.orDivider}
+            </span>
+            <span className="h-px flex-1 bg-white/20" />
+          </div>
+
+          <a
+            href={WHATSAPP_GROUP_URL}
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-3 bg-white/10 border border-white/25 text-white px-6 py-3 rounded-lg font-label text-xs tracking-widest uppercase transition-all hover:bg-white/20 hover:-translate-y-0.5"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 shrink-0" aria-hidden="true">
+              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.48 1.32 4.99L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 1.67c2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.55-3.7 8.25-8.25 8.25a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.55 3.7-8.25 8.25-8.25zm-4.52 3.83c-.16 0-.42.06-.64.31-.22.25-.85.83-.85 2.03 0 1.2.87 2.35.99 2.51.12.16 1.7 2.6 4.11 3.64 2 .87 2.41.7 2.84.65.43-.04 1.4-.57 1.6-1.12.2-.55.2-1.02.14-1.12-.06-.1-.22-.16-.46-.28-.24-.12-1.4-.69-1.62-.77-.22-.08-.38-.12-.54.12-.16.24-.62.77-.76.93-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.19-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.02-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.32-.75-1.8-.2-.47-.4-.4-.54-.41-.14-.01-.3-.01-.46-.01z" />
+            </svg>
+            {t.whatsappCta}
+          </a>
         </Reveal>
       </section>
 

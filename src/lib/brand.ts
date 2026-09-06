@@ -33,3 +33,5 @@ const VENUE_QUERY = encodeURIComponent(
 );
 export const GOOGLE_MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${VENUE_QUERY}`;
 export const APPLE_MAPS_URL = `https://maps.apple.com/?q=${VENUE_QUERY}`;
+
+export const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/FqZs9UacMia32h4saLxgNh";

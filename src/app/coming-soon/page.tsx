@@ -32,8 +32,8 @@ const COPY = {
     visionText:
       "In der Maybachstraße entsteht ein Ort, an dem Sport, modernes Design und echte Club-Atmosphäre zusammenkommen — kuratiert bis ins Detail, offen für alle, die mehr wollen als nur eine Buchung.",
 
-    floorplanLabel: "Unser Grundriss",
-    floorplanHeadline: "Modern, großzügig, durchdacht.",
+    floorplanLabel: "Was entsteht",
+    floorplanHeadline: "Mehr als ein Sportcenter.",
     floorplanIntro:
       "3 Doppel- und 1 Einzelcourt, ein eigener Gastro- & Loungebereich und eine Outdoor-Lounge zum Verweilen nach dem Match.",
     amenities: [
@@ -42,14 +42,9 @@ const COPY = {
       { icon: "local_bar", title: "Gastro & Lounge Bereich", text: "Mit Bar & Sitzplätzen" },
       { icon: "checkroom", title: "Umkleiden & Sanitärbereich", text: "Unter der Gastro" },
       { icon: "deck", title: "Outdoor-Lounge", text: "Mit Sitzbereich & Pflanzen" },
-    ],
-
-    featuresLabel: "Was entsteht",
-    featuresHeadline: "Mehr als ein Sportcenter.",
-    features: [
-      { n: "01", title: "Training, Turniere & Events", text: "Für Einsteiger, Ambitionierte und Firmenevents." },
-      { n: "02", title: "WLAN & Co-Working", text: "Auch für kurze Pausen zwischen den Spielen oder mobiles Arbeiten." },
-      { n: "03", title: "Digitale Buchung & Zugang", text: "Buchung und Zutritt komplett per App — rund um die Uhr." },
+      { icon: "emoji_events", title: "Training, Turniere & Events", text: "Für Einsteiger, Ambitionierte und Firmenevents" },
+      { icon: "wifi", title: "WLAN & Co-Working", text: "Auch für kurze Pausen oder mobiles Arbeiten" },
+      { icon: "smartphone", title: "Digitale Buchung & Zugang", text: "Komplett per App, rund um die Uhr" },
     ],
 
     loungeLabel: "Community",
@@ -106,8 +101,8 @@ const COPY = {
     visionText:
       "On Maybachstraße, a place is taking shape where sport, modern design and real club atmosphere come together — curated down to the last detail, open to anyone who wants more than just a booking.",
 
-    floorplanLabel: "Our floor plan",
-    floorplanHeadline: "Modern, spacious, thought through.",
+    floorplanLabel: "What's coming",
+    floorplanHeadline: "More than a sports center.",
     floorplanIntro:
       "3 double and 1 single court, our own bar & lounge area, and an outdoor lounge to hang out on after the match.",
     amenities: [
@@ -116,14 +111,9 @@ const COPY = {
       { icon: "local_bar", title: "Bar & lounge area", text: "With seating" },
       { icon: "checkroom", title: "Changing rooms & showers", text: "Below the bar area" },
       { icon: "deck", title: "Outdoor lounge", text: "With seating & plants" },
-    ],
-
-    featuresLabel: "What's coming",
-    featuresHeadline: "More than a sports center.",
-    features: [
-      { n: "01", title: "Training, tournaments & events", text: "For beginners, ambitious players and corporate events." },
-      { n: "02", title: "WiFi & co-working", text: "For short breaks between games or working on the go." },
-      { n: "03", title: "Digital booking & access", text: "Booking and entry entirely via app — around the clock." },
+      { icon: "emoji_events", title: "Training, tournaments & events", text: "For beginners and corporate events" },
+      { icon: "wifi", title: "WiFi & co-working", text: "For breaks or working on the go" },
+      { icon: "smartphone", title: "Digital booking & access", text: "Entirely via app, around the clock" },
     ],
 
     loungeLabel: "Community",
@@ -417,12 +407,17 @@ export default function ComingSoonPage() {
           </div>
           <div className="bg-surface-container-lowest rounded-xl p-6 editorial-shadow divide-y divide-outline-variant/20">
             {t.amenities.map((a) => (
-              <div key={a.title} className="flex items-start gap-4 py-4 first:pt-0 last:pb-0">
-                <span className="material-symbols-outlined text-primary text-xl mt-0.5 shrink-0">
+              <div
+                key={a.title}
+                className="group flex items-start gap-4 py-4 px-3 -mx-3 first:pt-4 last:pb-4 rounded-lg transition-colors duration-300 hover:bg-surface-container cursor-default"
+              >
+                <span className="material-symbols-outlined text-primary text-xl mt-0.5 shrink-0 transition-transform duration-300 group-hover:scale-[1.15]">
                   {a.icon}
                 </span>
                 <div>
-                  <p className="font-body text-sm font-medium leading-snug">{a.title}</p>
+                  <p className="font-body text-sm font-medium leading-snug transition-colors duration-300 group-hover:text-primary">
+                    {a.title}
+                  </p>
                   {"text" in a && a.text && (
                     <p className="text-xs text-on-surface-variant font-light mt-0.5">{a.text}</p>
                   )}
@@ -431,29 +426,6 @@ export default function ComingSoonPage() {
             ))}
           </div>
         </Reveal>
-      </section>
-
-      {/* Features */}
-      <section className="px-6 md:px-12 py-24 max-w-screen-xl mx-auto">
-        <Reveal className="text-center mb-16">
-          <span className="section-label justify-center inline-block">{t.featuresLabel}</span>
-          <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight">
-            {t.featuresHeadline}
-          </h2>
-        </Reveal>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {t.features.map((f, i) => (
-            <Reveal key={f.n} delayMs={i * 80}>
-              <div className="group bg-surface-container-lowest rounded-xl p-8 editorial-shadow transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
-                <span className="font-headline italic text-2xl text-primary mb-3 block">{f.n}</span>
-                <h3 className="font-body font-medium mb-2 transition-colors duration-300 group-hover:text-primary">
-                  {f.title}
-                </h3>
-                <p className="text-sm text-on-surface-variant font-light leading-relaxed">{f.text}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
       </section>
 
       {/* Lounge */}

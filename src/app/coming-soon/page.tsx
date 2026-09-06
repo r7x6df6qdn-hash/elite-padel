@@ -47,12 +47,9 @@ const COPY = {
     featuresLabel: "Was entsteht",
     featuresHeadline: "Mehr als ein Sportcenter.",
     features: [
-      { n: "01", title: "3 Indoor-Doppelcourts", text: "Hochwertige Courts mit professioneller Beleuchtung, ganzjährig indoor." },
-      { n: "02", title: "1 Indoor-Einzelcourt", text: "Für schnelle 1v1-Matches und Training." },
-      { n: "03", title: "Lounge & Aufenthaltsbereich", text: "Zum Ankommen, Verweilen und Bleiben nach dem Match." },
-      { n: "04", title: "Training, Turniere & Events", text: "Für Einsteiger, Ambitionierte und Firmenevents." },
-      { n: "05", title: "WLAN & Co-Working", text: "Auch für kurze Pausen zwischen den Spielen oder mobiles Arbeiten." },
-      { n: "06", title: "Digitale Buchung & Zugang", text: "Buchung und Zutritt komplett per App — rund um die Uhr." },
+      { n: "01", title: "Training, Turniere & Events", text: "Für Einsteiger, Ambitionierte und Firmenevents." },
+      { n: "02", title: "WLAN & Co-Working", text: "Auch für kurze Pausen zwischen den Spielen oder mobiles Arbeiten." },
+      { n: "03", title: "Digitale Buchung & Zugang", text: "Buchung und Zutritt komplett per App — rund um die Uhr." },
     ],
 
     loungeLabel: "Community",
@@ -124,12 +121,9 @@ const COPY = {
     featuresLabel: "What's coming",
     featuresHeadline: "More than a sports center.",
     features: [
-      { n: "01", title: "3 indoor double courts", text: "Premium courts with professional lighting, indoor year-round." },
-      { n: "02", title: "1 indoor single court", text: "For quick 1v1 matches and training." },
-      { n: "03", title: "Lounge & hangout area", text: "To arrive, stay and linger after the match." },
-      { n: "04", title: "Training, tournaments & events", text: "For beginners, ambitious players and corporate events." },
-      { n: "05", title: "WiFi & co-working", text: "For short breaks between games or working on the go." },
-      { n: "06", title: "Digital booking & access", text: "Booking and entry entirely via app — around the clock." },
+      { n: "01", title: "Training, tournaments & events", text: "For beginners, ambitious players and corporate events." },
+      { n: "02", title: "WiFi & co-working", text: "For short breaks between games or working on the go." },
+      { n: "03", title: "Digital booking & access", text: "Booking and entry entirely via app — around the clock." },
     ],
 
     loungeLabel: "Community",

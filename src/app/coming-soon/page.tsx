@@ -394,38 +394,34 @@ export default function ComingSoonPage() {
           </p>
         </Reveal>
 
-        <Reveal delayMs={100} className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
-          <div className="rounded-xl overflow-hidden editorial-shadow">
-            <Image
-              src="/hallenplan.jpg"
-              alt={t.floorplanHeadline}
-              width={1536}
-              height={1024}
-              sizes="(min-width: 1024px) 60vw, 100vw"
-              className="w-full h-auto block"
-            />
-          </div>
-          <div className="bg-surface-container-lowest rounded-xl p-6 editorial-shadow divide-y divide-outline-variant/20">
-            {t.amenities.map((a) => (
-              <div
-                key={a.title}
-                className="group flex items-start gap-4 py-4 px-3 -mx-3 first:pt-4 last:pb-4 rounded-lg transition-colors duration-300 hover:bg-surface-container cursor-default"
-              >
-                <span className="material-symbols-outlined text-primary text-xl mt-0.5 shrink-0 transition-transform duration-300 group-hover:scale-[1.15]">
-                  {a.icon}
-                </span>
-                <div>
-                  <p className="font-body text-sm font-medium leading-snug transition-colors duration-300 group-hover:text-primary">
-                    {a.title}
-                  </p>
-                  {"text" in a && a.text && (
-                    <p className="text-xs text-on-surface-variant font-light mt-0.5">{a.text}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+        <Reveal delayMs={100} className="rounded-xl overflow-hidden editorial-shadow mb-8">
+          <Image
+            src="/hallenplan.jpg"
+            alt={t.floorplanHeadline}
+            width={1536}
+            height={1024}
+            sizes="(min-width: 1280px) 1152px, 100vw"
+            className="w-full h-auto block"
+          />
         </Reveal>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {t.amenities.map((a, i) => (
+            <Reveal key={a.title} delayMs={100 + i * 60}>
+              <div className="group h-full bg-surface-container-lowest rounded-xl p-5 md:p-6 editorial-shadow transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
+                <span className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-primary/10 text-primary mb-4 transition-all duration-300 group-hover:bg-primary group-hover:text-on-primary group-hover:scale-110">
+                  <span className="material-symbols-outlined text-xl">{a.icon}</span>
+                </span>
+                <p className="font-body text-sm font-medium leading-snug transition-colors duration-300 group-hover:text-primary">
+                  {a.title}
+                </p>
+                {"text" in a && a.text && (
+                  <p className="text-xs text-on-surface-variant font-light mt-1">{a.text}</p>
+                )}
+              </div>
+            </Reveal>
+          ))}
+        </div>
       </section>
 
       {/* Lounge */}

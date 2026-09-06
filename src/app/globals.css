@@ -126,3 +126,35 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-bounce-y { animation: none; }
 }
+
+/* Film-grain texture for full-bleed photo/color sections — static noise,
+   blended with overlay so it reads as tactile paper grain rather than a
+   loud filter. Same technique on any surface, any color underneath. */
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Slow diagonal light sweep across the hero photo — a quiet, continuous
+   drift rather than a one-shot animation, echoing natural light moving
+   across the building facade. */
+@keyframes light-sweep {
+  0%, 100% { transform: translate(-15%, -15%) rotate(20deg); }
+  50%      { transform: translate(10%, 10%) rotate(20deg); }
+}
+
+.light-sweep {
+  position: absolute;
+  inset: -60% -20%;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, 0.07) 50%, transparent 58%);
+  animation: light-sweep 16s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light-sweep { animation: none; }
+}

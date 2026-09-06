@@ -267,16 +267,35 @@ function WaitlistForm({ t, locale }: { t: (typeof COPY)[Locale]; locale: Locale 
 
 export default function ComingSoonPage() {
   const [locale, setLocale] = useState<Locale>("de");
+  const [scrolled, setScrolled] = useState(false);
   const t = COPY[locale];
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header — fixed across the whole page (photo hero + cream sections
           below), so the logo and language toggle are always reachable, not
-          just buried inside the hero. */}
-      <header className="fixed top-0 inset-x-0 z-30 bg-background/90 backdrop-blur-md border-b border-outline-variant/30">
-        <div className="flex items-center justify-between px-6 md:px-12 py-4">
-          <Logo className="h-5 md:h-6 w-auto" />
+          just buried inside the hero. Shrinks and firms up its backdrop once
+          the page scrolls, instead of sitting static the whole time. */}
+      <header
+        className={`fixed top-0 inset-x-0 z-30 backdrop-blur-md transition-all duration-300 ${
+          scrolled
+            ? "bg-background/95 border-b border-outline-variant/30 shadow-sm"
+            : "bg-background/70 border-b border-transparent"
+        }`}
+      >
+        <div
+          className={`flex items-center justify-between px-6 md:px-12 transition-all duration-300 ${
+            scrolled ? "py-2.5" : "py-4"
+          }`}
+        >
+          <Logo className={`w-auto transition-all duration-300 ${scrolled ? "h-4 md:h-5" : "h-5 md:h-6"}`} />
           <div className="flex items-center gap-1 text-[11px] font-label tracking-widest uppercase">
             <button
               onClick={() => setLocale("de")}
@@ -316,6 +335,8 @@ export default function ComingSoonPage() {
             className="object-cover object-[2%_center] md:object-center"
           />
           <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(23,17,15,0.95)_0%,rgba(23,17,15,0.9)_48%,rgba(23,17,15,0.4)_75%,rgba(23,17,15,0.05)_100%)]" />
+          <div className="light-sweep" />
+          <div className="grain-overlay" />
         </div>
 
         <div className="relative z-10 max-w-2xl">
@@ -359,8 +380,9 @@ export default function ComingSoonPage() {
           before opening is the most important thing this page can do. A
           solid primary-color break (the only one on the page) makes this
           the visual peak of the scroll, not just another cream section. */}
-      <section className="px-6 md:px-12 py-20 md:py-28 bg-primary text-on-primary">
-        <Reveal className="max-w-2xl mx-auto text-center">
+      <section className="relative overflow-hidden px-6 md:px-12 py-20 md:py-28 bg-primary text-on-primary">
+        <div className="grain-overlay" />
+        <Reveal className="relative max-w-2xl mx-auto text-center">
           <span className="material-symbols-outlined text-4xl mb-5 block text-primary-fixed-dim">
             mail
           </span>
@@ -555,17 +577,23 @@ export default function ComingSoonPage() {
                 href={GOOGLE_MAPS_URL}
                 target="_blank"
                 rel="noopener"
-                className="btn-outline text-[10px] text-center"
+                className="group inline-flex items-center justify-between gap-4 border border-primary/30 text-primary pl-5 pr-1.5 py-1.5 rounded-full font-label text-[10px] tracking-widest uppercase transition-colors hover:border-primary hover:bg-primary/5"
               >
                 {t.openGoogle}
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-on-primary transition-transform duration-300 group-hover:rotate-45 shrink-0">
+                  <span className="material-symbols-outlined text-base">arrow_outward</span>
+                </span>
               </a>
               <a
                 href={APPLE_MAPS_URL}
                 target="_blank"
                 rel="noopener"
-                className="btn-outline text-[10px] text-center"
+                className="group inline-flex items-center justify-between gap-4 border border-primary/30 text-primary pl-5 pr-1.5 py-1.5 rounded-full font-label text-[10px] tracking-widest uppercase transition-colors hover:border-primary hover:bg-primary/5"
               >
                 {t.openApple}
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-on-primary transition-transform duration-300 group-hover:rotate-45 shrink-0">
+                  <span className="material-symbols-outlined text-base">arrow_outward</span>
+                </span>
               </a>
             </div>
           </div>

@@ -9,7 +9,20 @@ const intlMiddleware = createMiddleware(routing);
 // (§ 5 TMG) applies regardless of whether the site is "live" yet.
 const ALWAYS_ALLOWED = ["/coming-soon", "/impressum", "/datenschutz"];
 
+// The project still answers on the old elite-padel.de domain. Serving the
+// same pages under two hostnames splits the brand and reads as duplicate
+// content to search engines, so the old one permanently forwards to the
+// canonical domain instead.
+const CANONICAL_HOST = "rueckwand-padel.de";
+const LEGACY_HOSTS = ["elite-padel.de", "www.elite-padel.de"];
+
 export default function middleware(request: NextRequest) {
+  const host = request.headers.get("host")?.toLowerCase();
+  if (host && LEGACY_HOSTS.includes(host)) {
+    const target = new URL(request.nextUrl.pathname + request.nextUrl.search, `https://${CANONICAL_HOST}`);
+    return NextResponse.redirect(target, 308);
+  }
+
   if (COMING_SOON) {
     // These live outside the [locale] segment (no nav/footer chrome) — let
     // them through untouched. Everything else that would normally reach the

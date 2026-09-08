@@ -513,12 +513,15 @@ export default function ComingSoonPage() {
           so it clears even a small viewport once the browser chrome is
           showing; svh (not vh) is what keeps that true. */}
       <section className="z-0 px-6 md:px-12 py-20 bg-surface-container-lowest sticky top-0 min-h-[100svh] flex items-center">
-        <Reveal className="max-w-screen-md mx-auto text-center w-full">
+        <Reveal className="max-w-4xl mx-auto text-center w-full">
           <span className="section-label justify-center inline-block">{t.visionLabel}</span>
-          <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight mb-6">
+          {/* Held on screen longer than any other section, so the type has to
+              carry that space — this is the page's statement beat, not another
+              standard section heading. */}
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-headline italic tracking-tighter leading-[1.05] mb-8 md:mb-10">
             {t.visionHeadline}
           </h2>
-          <p className="text-on-surface-variant font-light leading-relaxed max-w-xl mx-auto">
+          <p className="text-on-surface-variant font-light leading-relaxed max-w-xl mx-auto md:text-lg">
             {t.visionText}
           </p>
         </Reveal>

@@ -364,7 +364,7 @@ export default function ComingSoonPage() {
           taller than the screen; the section inside stays pinned while the
           split plays out. */}
       <div ref={heroRef} className="relative h-[200vh]">
-        <section className="sticky top-0 h-screen overflow-hidden flex flex-col justify-end px-6 md:px-16 pb-20 md:pb-24 bg-[#171110]">
+        <section className="sticky top-0 h-screen overflow-hidden flex flex-col justify-end px-6 md:px-16 pb-20 md:pb-24 bg-background">
           {/* Sits behind the halves, so opening the curtain lands on the
               wordmark rather than on an empty black screen. */}
           <div
@@ -374,7 +374,7 @@ export default function ComingSoonPage() {
               transform: `scale(${0.94 + heroProgress * 0.06})`,
             }}
           >
-            <Logo invert className="h-9 md:h-16 w-auto" />
+            <Logo className="h-9 md:h-16 w-auto" />
           </div>
 
           {/* Left half: shows the left 50% of the photo, exits to the left. */}

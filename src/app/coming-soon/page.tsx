@@ -517,11 +517,19 @@ export default function ComingSoonPage() {
           <span className="section-label justify-center inline-block">{t.visionLabel}</span>
           {/* Held on screen longer than any other section, so the type has to
               carry that space — this is the page's statement beat, not another
-              standard section heading. */}
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-headline italic tracking-tighter leading-[1.05] mb-8 md:mb-10">
+              standard section heading.
+
+              On a 375px phone the long place name ("Ludwigsburg,") is what
+              sets the minimum line width: at 36px it ran the full measure
+              edge to edge and the wrap left "gedacht." orphaned on its own
+              line. 2rem plus text-balance gives the widest line real margin
+              and spreads the rag evenly instead. tracking only tightens from
+              md up — at phone sizes the tighter setting reads as cramped
+              rather than as deliberate display type. */}
+          <h2 className="text-[2rem] md:text-6xl lg:text-7xl font-headline italic tracking-tight md:tracking-tighter leading-[1.08] md:leading-[1.05] text-balance mb-8 md:mb-10">
             {t.visionHeadline}
           </h2>
-          <p className="text-on-surface-variant font-light leading-relaxed max-w-xl mx-auto md:text-lg">
+          <p className="text-on-surface-variant font-light leading-relaxed max-w-xl mx-auto text-pretty md:text-lg">
             {t.visionText}
           </p>
         </Reveal>

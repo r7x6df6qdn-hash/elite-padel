@@ -508,11 +508,12 @@ export default function ComingSoonPage() {
         </Reveal>
       </section>
 
-      {/* Vision — pinned on desktop so the floor plan section below scrolls
-          up over it like a card being dealt on top. Left as normal flow on
-          phones, where pinning a full screen costs more than it adds. */}
-      <section className="z-0 px-6 md:px-12 py-20 bg-surface-container-lowest md:sticky md:top-0 md:min-h-screen md:flex md:items-center">
-        <Reveal className="max-w-screen-md mx-auto text-center md:w-full">
+      {/* Vision — pinned so the floor plan section below scrolls up over it
+          like a card dealt on top. Measured at 460px on a 375px-wide phone,
+          so it clears even a small viewport once the browser chrome is
+          showing; svh (not vh) is what keeps that true. */}
+      <section className="z-0 px-6 md:px-12 py-20 bg-surface-container-lowest sticky top-0 min-h-[100svh] flex items-center">
+        <Reveal className="max-w-screen-md mx-auto text-center w-full">
           <span className="section-label justify-center inline-block">{t.visionLabel}</span>
           <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight mb-6">
             {t.visionHeadline}
@@ -527,7 +528,7 @@ export default function ComingSoonPage() {
           covers it edge to edge as it slides up. The rounded top edge and
           upward shadow are what make the slide legible between two sections
           that are nearly the same cream. */}
-      <section className="relative z-10 bg-background px-6 md:px-12 py-24 md:rounded-t-[2.5rem] md:shadow-[0_-24px_60px_-20px_rgba(27,28,26,0.18)]">
+      <section className="relative z-10 bg-background px-6 md:px-12 py-24 rounded-t-[1.75rem] md:rounded-t-[2.5rem] shadow-[0_-24px_60px_-20px_rgba(27,28,26,0.18)]">
         <div className="max-w-screen-xl mx-auto">
         <Reveal className="text-center mb-16">
           <span className="section-label justify-center inline-block">{t.floorplanLabel}</span>
@@ -641,7 +642,7 @@ export default function ComingSoonPage() {
       </section>
 
       {/* Location — covers the pinned booking section edge to edge. */}
-      <section className="relative z-10 bg-background px-6 md:px-12 py-24 md:rounded-t-[2.5rem] md:shadow-[0_-24px_60px_-20px_rgba(27,28,26,0.35)]">
+      <section className="relative z-10 bg-background px-6 md:px-12 py-24 rounded-t-[1.75rem] md:rounded-t-[2.5rem] shadow-[0_-24px_60px_-20px_rgba(27,28,26,0.35)]">
         <div className="max-w-screen-xl mx-auto">
         <Reveal className="text-center mb-16">
           <span className="section-label justify-center inline-block">{t.locationLabel}</span>

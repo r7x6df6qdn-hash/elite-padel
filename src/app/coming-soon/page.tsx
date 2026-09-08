@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   SITE_NAME,
@@ -14,6 +14,7 @@ import {
 } from "@/lib/brand";
 import Reveal from "@/components/Reveal";
 import Logo from "@/components/Logo";
+import Parallax from "@/components/Parallax";
 
 type Locale = "de" | "en";
 
@@ -268,6 +269,10 @@ function WaitlistForm({ t, locale }: { t: (typeof COPY)[Locale]; locale: Locale 
 export default function ComingSoonPage() {
   const [locale, setLocale] = useState<Locale>("de");
   const [scrolled, setScrolled] = useState(false);
+  // 0 = hero fully closed, 1 = both halves have cleared the screen. Drives
+  // the split-open effect while the hero is pinned.
+  const [heroProgress, setHeroProgress] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
   const t = COPY[locale];
 
   useEffect(() => {
@@ -276,6 +281,39 @@ export default function ComingSoonPage() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const el = heroRef.current;
+      if (!el) return;
+      // The wrapper is taller than the viewport; the sticky child stays put
+      // while we scroll through that extra height. How far we are through it
+      // is the animation timeline.
+      const travel = el.offsetHeight - window.innerHeight;
+      const scrolled = -el.getBoundingClientRect().top;
+      setHeroProgress(travel > 0 ? Math.min(1, Math.max(0, scrolled / travel)) : 0);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  // Content clears out over the first half of the split so it never sits
+  // awkwardly on top of the gap opening behind it.
+  const contentOpacity = Math.max(0, 1 - heroProgress * 2.2);
 
   return (
     <div className="min-h-screen bg-background">
@@ -320,61 +358,115 @@ export default function ComingSoonPage() {
         </div>
       </header>
 
-      {/* Hero — real exterior render as full-bleed background. Content sits
-          bottom-left, not centered in a card: the photo is dark enough on
-          its own now to carry the text directly, and an asymmetric block
-          reads as art-directed rather than a stock landing-page layout. */}
-      <section className="relative flex flex-col justify-end px-6 md:px-16 pt-32 pb-20 md:pb-24 min-h-[95vh] overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/aussenansicht.jpg"
-            alt={`${SITE_NAME} building exterior`}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[2%_center] md:object-center"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(23,17,15,0.95)_0%,rgba(23,17,15,0.9)_48%,rgba(23,17,15,0.4)_75%,rgba(23,17,15,0.05)_100%)]" />
-          <div className="light-sweep" />
-          <div className="grain-overlay" />
-        </div>
+      {/* Hero — the photo is split down the middle into two halves that slide
+          off both edges as you scroll through this wrapper's extra height,
+          opening like a curtain onto the page behind it. The wrapper is
+          taller than the screen; the section inside stays pinned while the
+          split plays out. */}
+      <div ref={heroRef} className="relative h-[200vh]">
+        <section className="sticky top-0 h-screen overflow-hidden flex flex-col justify-end px-6 md:px-16 pb-20 md:pb-24 bg-[#171110]">
+          {/* Sits behind the halves, so opening the curtain lands on the
+              wordmark rather than on an empty black screen. */}
+          <div
+            className="absolute inset-0 z-0 flex items-center justify-center px-6 pointer-events-none"
+            style={{
+              opacity: Math.min(1, Math.max(0, (heroProgress - 0.35) / 0.4)),
+              transform: `scale(${0.94 + heroProgress * 0.06})`,
+            }}
+          >
+            <Logo invert className="h-9 md:h-16 w-auto" />
+          </div>
 
-        <div className="relative z-10 max-w-2xl">
-          {/* No second logo mark here — the photo already carries the brand
-              (facade lettering, flags, entrance sign) and the header above
-              now carries the persistent logo, so a third mark would just
-              compete with both. */}
-          <span className="sr-only">{SITE_NAME} – Urban Padel Club</span>
+          {/* Left half: shows the left 50% of the photo, exits to the left. */}
+          <div
+            className="absolute inset-y-0 left-0 w-1/2 overflow-hidden z-10 will-change-transform"
+            style={{ transform: `translate3d(${-heroProgress * 100}%,0,0)` }}
+          >
+            <div className="absolute inset-y-0 left-0 w-screen">
+              <Image
+                src="/aussenansicht.jpg"
+                alt={`${SITE_NAME} building exterior`}
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover object-[2%_center] md:object-center"
+              />
+            </div>
+          </div>
 
-          <span className="inline-flex items-center gap-2 text-white/70 mb-6">
-            <span className="material-symbols-outlined text-sm shrink-0">location_on</span>
-            <span className="font-label text-[11px] tracking-[0.3em] uppercase">
-              {t.addressPill}
+          {/* Right half: the same photo, right-aligned so the two seam up. */}
+          <div
+            className="absolute inset-y-0 right-0 w-1/2 overflow-hidden z-10 will-change-transform"
+            style={{ transform: `translate3d(${heroProgress * 100}%,0,0)` }}
+          >
+            <div className="absolute inset-y-0 right-0 w-screen">
+              <Image
+                src="/aussenansicht.jpg"
+                alt=""
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover object-[2%_center] md:object-center"
+              />
+            </div>
+          </div>
+
+          {/* Treatments ride above both halves and fade out with them. */}
+          <div
+            className="absolute inset-0 z-20 pointer-events-none"
+            style={{ opacity: 1 - heroProgress }}
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(23,17,15,0.95)_0%,rgba(23,17,15,0.9)_48%,rgba(23,17,15,0.4)_75%,rgba(23,17,15,0.05)_100%)]" />
+            <div className="light-sweep" />
+            <div className="grain-overlay" />
+          </div>
+
+          <div
+            className="relative z-30 max-w-2xl will-change-transform"
+            style={{
+              opacity: contentOpacity,
+              transform: `translate3d(0,${-heroProgress * 60}px,0)`,
+            }}
+          >
+            {/* No second logo mark here — the photo already carries the brand
+                (facade lettering, flags, entrance sign) and the header above
+                now carries the persistent logo, so a third mark would just
+                compete with both. */}
+            <span className="sr-only">{SITE_NAME} – Urban Padel Club</span>
+
+            <span className="inline-flex items-center gap-2 text-white/70 mb-6">
+              <span className="material-symbols-outlined text-sm shrink-0">location_on</span>
+              <span className="font-label text-[11px] tracking-[0.3em] uppercase">
+                {t.addressPill}
+              </span>
             </span>
-          </span>
 
-          <h1 className="text-5xl md:text-7xl font-headline italic leading-[1.05] tracking-tighter text-white mb-5">
-            {t.headline}
-          </h1>
+            <h1 className="text-5xl md:text-7xl font-headline italic leading-[1.05] tracking-tighter text-white mb-5">
+              {t.headline}
+            </h1>
 
-          <span className="inline-block font-label text-[11px] tracking-[0.3em] uppercase text-primary-fixed-dim mb-6 pb-1 border-b border-primary-fixed-dim/40">
-            {t.comingSoon}
-          </span>
+            <span className="inline-block font-label text-[11px] tracking-[0.3em] uppercase text-primary-fixed-dim mb-6 pb-1 border-b border-primary-fixed-dim/40">
+              {t.comingSoon}
+            </span>
 
-          <p className="text-lg font-body font-light text-white mb-3 max-w-lg">
-            {t.subheadline}
-          </p>
+            <p className="text-lg font-body font-light text-white mb-3 max-w-lg">
+              {t.subheadline}
+            </p>
 
-          <p className="text-sm font-body font-light text-stone-300 leading-relaxed max-w-md">
-            {t.description}
-          </p>
-        </div>
+            <p className="text-sm font-body font-light text-stone-300 leading-relaxed max-w-md">
+              {t.description}
+            </p>
+          </div>
 
-        <div className="relative z-10 hidden md:flex mt-14 items-center gap-3 text-white/60 animate-bounce-y">
-          <span className="font-label text-[10px] tracking-[0.3em] uppercase">{t.scroll}</span>
-          <span className="w-10 h-px bg-white/40" />
-        </div>
-      </section>
+          <div
+            className="relative z-30 hidden md:flex mt-14 items-center gap-3 text-white/60 animate-bounce-y"
+            style={{ opacity: contentOpacity }}
+          >
+            <span className="font-label text-[10px] tracking-[0.3em] uppercase">{t.scroll}</span>
+            <span className="w-10 h-px bg-white/40" />
+          </div>
+        </section>
+      </div>
 
       {/* Waitlist signup — right after the hero, since capturing sign-ups
           before opening is the most important thing this page can do. A
@@ -441,15 +533,17 @@ export default function ComingSoonPage() {
           </p>
         </Reveal>
 
-        <Reveal delayMs={100} className="rounded-xl overflow-hidden editorial-shadow mb-8">
-          <Image
-            src="/hallenplan.jpg"
-            alt={t.floorplanHeadline}
-            width={1536}
-            height={1024}
-            sizes="(min-width: 1280px) 1152px, 100vw"
-            className="w-full h-auto block"
-          />
+        <Reveal delayMs={100} className="mb-8">
+          <Parallax className="rounded-xl editorial-shadow" strength={28}>
+            <Image
+              src="/hallenplan.jpg"
+              alt={t.floorplanHeadline}
+              width={1536}
+              height={1024}
+              sizes="(min-width: 1280px) 1152px, 100vw"
+              className="w-full h-auto block"
+            />
+          </Parallax>
         </Reveal>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -483,15 +577,17 @@ export default function ComingSoonPage() {
           </p>
         </Reveal>
 
-        <Reveal delayMs={100} className="rounded-xl overflow-hidden editorial-shadow">
-          <Image
-            src="/lounge.jpg"
-            alt={t.loungeHeadline}
-            width={1448}
-            height={1086}
-            sizes="(min-width: 1280px) 1152px, 100vw"
-            className="w-full h-auto block"
-          />
+        <Reveal delayMs={100}>
+          <Parallax className="rounded-xl editorial-shadow" strength={36}>
+            <Image
+              src="/lounge.jpg"
+              alt={t.loungeHeadline}
+              width={1448}
+              height={1086}
+              sizes="(min-width: 1280px) 1152px, 100vw"
+              className="w-full h-auto block"
+            />
+          </Parallax>
         </Reveal>
       </section>
 

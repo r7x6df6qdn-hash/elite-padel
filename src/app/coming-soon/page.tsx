@@ -314,6 +314,11 @@ export default function ComingSoonPage() {
   // Content clears out over the first half of the split so it never sits
   // awkwardly on top of the gap opening behind it.
   const contentOpacity = Math.max(0, 1 - heroProgress * 2.2);
+  // Only hint the compositor while the split is actually in motion — a
+  // permanent will-change keeps three full-screen layers alive for the
+  // whole page and starves the sections below it on mobile.
+  const heroAnimating = heroProgress > 0 && heroProgress < 1;
+  const heroWillChange = heroAnimating ? "transform, opacity" : "auto";
 
   return (
     <div className="min-h-screen bg-background">
@@ -322,10 +327,10 @@ export default function ComingSoonPage() {
           just buried inside the hero. Shrinks and firms up its backdrop once
           the page scrolls, instead of sitting static the whole time. */}
       <header
-        className={`fixed top-0 inset-x-0 z-30 backdrop-blur-md transition-all duration-300 ${
+        className={`fixed top-0 inset-x-0 z-30 md:backdrop-blur-md transition-all duration-300 ${
           scrolled
-            ? "bg-background/95 border-b border-outline-variant/30 shadow-sm"
-            : "bg-background/70 border-b border-transparent"
+            ? "bg-background md:bg-background/95 border-b border-outline-variant/30 shadow-sm"
+            : "bg-background/70 backdrop-blur-md border-b border-transparent"
         }`}
       >
         <div
@@ -379,8 +384,8 @@ export default function ComingSoonPage() {
 
           {/* Left half: shows the left 50% of the photo, exits to the left. */}
           <div
-            className="absolute inset-y-0 left-0 w-1/2 overflow-hidden z-10 will-change-transform"
-            style={{ transform: `translate3d(${-heroProgress * 100}%,0,0)` }}
+            className="absolute inset-y-0 left-0 w-1/2 overflow-hidden z-10"
+            style={{ transform: `translate3d(${-heroProgress * 100}%,0,0)`, willChange: heroWillChange }}
           >
             <div className="absolute inset-y-0 left-0 w-screen">
               <Image
@@ -396,8 +401,8 @@ export default function ComingSoonPage() {
 
           {/* Right half: the same photo, right-aligned so the two seam up. */}
           <div
-            className="absolute inset-y-0 right-0 w-1/2 overflow-hidden z-10 will-change-transform"
-            style={{ transform: `translate3d(${heroProgress * 100}%,0,0)` }}
+            className="absolute inset-y-0 right-0 w-1/2 overflow-hidden z-10"
+            style={{ transform: `translate3d(${heroProgress * 100}%,0,0)`, willChange: heroWillChange }}
           >
             <div className="absolute inset-y-0 right-0 w-screen">
               <Image
@@ -422,10 +427,11 @@ export default function ComingSoonPage() {
           </div>
 
           <div
-            className="relative z-30 max-w-2xl will-change-transform"
+            className="relative z-30 max-w-2xl"
             style={{
               opacity: contentOpacity,
               transform: `translate3d(0,${-heroProgress * 60}px,0)`,
+              willChange: heroWillChange,
             }}
           >
             {/* No second logo mark here — the photo already carries the brand
@@ -508,10 +514,20 @@ export default function ComingSoonPage() {
         </Reveal>
       </section>
 
-      {/* Vision — pinned so the floor plan section below scrolls up over it
-          like a card dealt on top. Measured at 460px on a 375px-wide phone,
-          so it clears even a small viewport once the browser chrome is
-          showing; svh (not vh) is what keeps that true. */}
+      {/* Vision + floor plan are one scroll group. The wrapper matters: a
+          sticky element stays pinned until ITS CONTAINER's bottom passes, so
+          without it the vision section is pinned against the page root and
+          stays a full-screen composited layer under every section below it —
+          4.5k px of scrolling on a phone, and the stutter that comes with it.
+          Bounded here, the browser drops the layer once the floor plan (1444px,
+          comfortably taller than the viewport, so the cover is never seen to
+          break) has travelled over it.
+
+          Vision itself is pinned so the floor plan scrolls up over it like a
+          card dealt on top. Measured at 460px on a 375px-wide phone, so it
+          clears even a small viewport once the browser chrome is showing;
+          svh (not vh) is what keeps that true. */}
+      <div className="relative">
       <section className="z-0 px-6 md:px-12 py-20 bg-surface-container-lowest sticky top-0 min-h-[100svh] flex items-center">
         <Reveal className="max-w-4xl mx-auto text-center w-full">
           <span className="section-label justify-center inline-block">{t.visionLabel}</span>
@@ -538,7 +554,7 @@ export default function ComingSoonPage() {
       {/* Floor plan — full-bleed background and a layer above Vision, so it
           covers it edge to edge as it slides up. The rounded top edge and
           upward shadow are what make the slide legible between two sections
-          that are nearly the same cream. */}
+          that are nearly the same cream. Closes the group above. */}
       <section className="relative z-10 bg-background px-6 md:px-12 py-24 rounded-t-[1.75rem] md:rounded-t-[2.5rem] shadow-[0_-24px_60px_-20px_rgba(27,28,26,0.18)]">
         <div className="max-w-screen-xl mx-auto">
         <Reveal className="text-center mb-16">
@@ -583,6 +599,7 @@ export default function ComingSoonPage() {
         </div>
         </div>
       </section>
+      </div>
 
       {/* Lounge */}
       <section className="relative z-10 bg-background px-6 md:px-12 py-24 max-w-screen-xl mx-auto">

@@ -30,6 +30,7 @@ const COPY = {
     // ticker or is said properly further down the page.
     heroMeta: `Urban Padel Club · Eröffnung ${OPENING_WINDOW_DE}`,
     ticker: [
+      `${VENUE_ADDRESS.street} · ${VENUE_ADDRESS.city}`,
       "3 Doppelcourts",
       "1 Singlecourt",
       "Gastro & Lounge",
@@ -112,6 +113,7 @@ const COPY = {
     openingLabel: "Planned opening",
     heroMeta: `Urban Padel Club · Opening ${OPENING_WINDOW_EN}`,
     ticker: [
+      `${VENUE_ADDRESS.street} · ${VENUE_ADDRESS.city}`,
       "3 double courts",
       "1 single court",
       "Bar & lounge",
@@ -471,12 +473,12 @@ export default function ComingSoonPage() {
           >
             <div className="absolute inset-y-0 left-0 w-screen ken-burns">
               <Image
-                src="/aussenansicht.jpg"
-                alt={`${SITE_NAME} building exterior`}
+                src="/halle.jpg"
+                alt={`${SITE_NAME} — Blick über die Padelcourts in der Halle`}
                 fill
                 priority
                 sizes="100vw"
-                className="object-cover object-[40%_center] md:object-center"
+                className="object-cover object-center"
               />
             </div>
           </div>
@@ -488,12 +490,12 @@ export default function ComingSoonPage() {
           >
             <div className="absolute inset-y-0 right-0 w-screen ken-burns">
               <Image
-                src="/aussenansicht.jpg"
+                src="/halle.jpg"
                 alt=""
                 fill
                 priority
                 sizes="100vw"
-                className="object-cover object-[40%_center] md:object-center"
+                className="object-cover object-center"
               />
             </div>
           </div>
@@ -503,7 +505,12 @@ export default function ComingSoonPage() {
             className="absolute inset-0 z-20 pointer-events-none"
             style={{ opacity: 1 - heroProgress }}
           >
-            <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(23,17,15,0.95)_0%,rgba(23,17,15,0.9)_48%,rgba(23,17,15,0.4)_75%,rgba(23,17,15,0.05)_100%)]" />
+            {/* Two light passes instead of one heavy one: a short lift off
+                the bottom edge, and a vignette from the left. Between them
+                they protect the type in the bottom-left corner and leave the
+                courts and the lit ceiling lines untouched. */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(12,10,9,0.92)_0%,rgba(12,10,9,0.74)_20%,rgba(12,10,9,0.3)_42%,rgba(12,10,9,0)_66%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(12,10,9,0.6)_0%,rgba(12,10,9,0.22)_34%,rgba(12,10,9,0)_58%)]" />
             <div className="light-sweep" />
             <div className="grain-overlay" />
           </div>
@@ -519,18 +526,16 @@ export default function ComingSoonPage() {
               willChange: heroWillChange,
             }}
           >
-            {/* No second logo mark here — the photo already carries the brand
-                (facade lettering, flags, entrance sign) and the header above
-                now carries the persistent logo, so a third mark would just
-                compete with both. */}
-            <span className="sr-only">{SITE_NAME} – Urban Padel Club</span>
+            {/* The wordmark belongs here now. The old facade shot carried the
+                brand itself — lettering, flags, entrance sign — so a mark in
+                the copy would have been a third one competing. This interior
+                carries none, and a full-screen hall photo under "Bald ist es
+                soweit." otherwise never says whose hall it is. */}
 
             <div className="rise-in" style={{ animationDelay: "120ms" }}>
-              <span className="block font-label text-[10px] md:text-[11px] font-medium tracking-[0.26em] md:tracking-[0.34em] uppercase text-white/80">
-                {t.addressPill}
-              </span>
+              <Logo className="h-7 md:h-10 w-auto" invert />
               <span
-                className="block h-px w-16 bg-primary-fixed-dim/70 mt-3 mb-6 rule-draw"
+                className="block h-px w-16 bg-primary-fixed-dim/70 mt-5 mb-6 rule-draw"
                 style={{ animationDelay: "420ms" }}
               />
             </div>

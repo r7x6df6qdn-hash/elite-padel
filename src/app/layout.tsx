@@ -23,12 +23,18 @@ export default function RootLayout({
   return (
     <html lang="de">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Archivo (display) + Inter Tight (text). Both variable: Archivo
+            carries a width axis as well, which is what lets the display type
+            sit slightly wide and heavy — the same posture as the rückwand
+            wordmark, which is a bold oblique geometric sans. The old pairing
+            (Noto Serif italic + Manrope) came from a different world than the
+            logo entirely, which is what made the page read as stock template.
+            Material Symbols is loaded per-page now (see admin/booking layouts)
+            — the public coming-soon page carries no icon font at all. */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap"
           rel="stylesheet"
         />
       </head>

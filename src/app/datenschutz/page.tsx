@@ -14,14 +14,22 @@ export default function DatenschutzPage() {
           href="/coming-soon"
           className="text-on-surface-variant font-label text-xs tracking-widest uppercase hover:text-primary transition-colors mb-10 inline-flex items-center gap-2"
         >
-          <span className="material-symbols-outlined text-sm">arrow_back</span>
+          <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" aria-hidden="true">
+            <path
+              d="M10 3 5 8l5 5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
           Zurück
         </Link>
 
         <Logo className="h-6 w-auto mb-10" />
 
         <span className="section-label">Rechtliches</span>
-        <h1 className="text-4xl font-headline italic tracking-tighter mb-12">
+        <h1 className="display text-4xl md:text-5xl mb-12">
           Datenschutzerklärung
         </h1>
 

@@ -21,12 +21,23 @@ type Locale = "de" | "en";
 const COPY = {
   de: {
     badge: "Padel Club Ludwigsburg",
-    addressPill: `${VENUE_ADDRESS.street} · ${VENUE_ADDRESS.zip} ${VENUE_ADDRESS.city}`,
+    addressPill: `${VENUE_ADDRESS.street} · ${VENUE_ADDRESS.city}`,
     comingSoon: "Coming Soon",
     headline: "Bald ist es soweit.",
     openingLabel: "Geplante Eröffnung",
-    subheadline: `${SITE_NAME} eröffnet ${OPENING_WINDOW_DE} in Ludwigsburg.`,
-    description: "Ludwigsburg bekommt einen neuen Ort für Padel, Community und Events.",
+    // One line under the headline instead of the old badge + two paragraphs.
+    // Everything that used to be spelled out up here now either moves in the
+    // ticker or is said properly further down the page.
+    heroMeta: `Urban Padel Club · Eröffnung ${OPENING_WINDOW_DE}`,
+    ticker: [
+      "3 Doppelcourts",
+      "1 Singlecourt",
+      "Gastro & Lounge",
+      "Outdoor-Lounge",
+      "Training & Turniere",
+      "Buchung per App",
+      `Eröffnung ${OPENING_WINDOW_DE}`,
+    ],
     scroll: "Scrollen",
 
     visionLabel: "Unsere Vision",
@@ -38,15 +49,18 @@ const COPY = {
     floorplanHeadline: "Mehr als ein Sportcenter.",
     floorplanIntro:
       "3 Doppel- und 1 Einzelcourt, ein eigener Gastro- & Loungebereich und eine Outdoor-Lounge zum Verweilen nach dem Match.",
+    // No icons here on purpose. Eight generic glyphs in eight identical
+    // circles is the single strongest "generated page" tell there is; the
+    // list reads as a spec sheet now, numbered and ruled.
     amenities: [
-      { icon: "sports_tennis", title: "3 Doppel Padel Courts" },
-      { icon: "sports_tennis", title: "1 Single Padel Court" },
-      { icon: "local_bar", title: "Gastro & Lounge Bereich", text: "Mit Bar & Sitzplätzen" },
-      { icon: "checkroom", title: "Umkleiden & Sanitärbereich", text: "Unter der Gastro" },
-      { icon: "deck", title: "Outdoor-Lounge", text: "Mit Sitzbereich & Pflanzen" },
-      { icon: "emoji_events", title: "Training, Turniere & Events", text: "Für Einsteiger, Ambitionierte und Firmenevents" },
-      { icon: "wifi", title: "WLAN & Co-Working", text: "Auch für kurze Pausen oder mobiles Arbeiten" },
-      { icon: "smartphone", title: "Digitale Buchung & Zugang", text: "Komplett per App, rund um die Uhr" },
+      { title: "3 Doppel Padel Courts" },
+      { title: "1 Single Padel Court" },
+      { title: "Gastro & Lounge Bereich", text: "Mit Bar & Sitzplätzen" },
+      { title: "Umkleiden & Sanitärbereich", text: "Unter der Gastro" },
+      { title: "Outdoor-Lounge", text: "Mit Sitzbereich & Pflanzen" },
+      { title: "Training, Turniere & Events", text: "Für Einsteiger, Ambitionierte und Firmenevents" },
+      { title: "WLAN & Co-Working", text: "Auch für kurze Pausen oder mobiles Arbeiten" },
+      { title: "Digitale Buchung & Zugang", text: "Komplett per App, rund um die Uhr" },
     ],
 
     loungeLabel: "Community",
@@ -92,12 +106,20 @@ const COPY = {
   },
   en: {
     badge: "Padel Club Ludwigsburg",
-    addressPill: `${VENUE_ADDRESS.street} · ${VENUE_ADDRESS.zip} ${VENUE_ADDRESS.city}`,
+    addressPill: `${VENUE_ADDRESS.street} · ${VENUE_ADDRESS.city}`,
     comingSoon: "Coming Soon",
-    headline: "Coming soon.",
+    headline: "Almost there.",
     openingLabel: "Planned opening",
-    subheadline: `${SITE_NAME} opens ${OPENING_WINDOW_EN} in Ludwigsburg.`,
-    description: "Ludwigsburg is getting a new home for padel, community and events.",
+    heroMeta: `Urban Padel Club · Opening ${OPENING_WINDOW_EN}`,
+    ticker: [
+      "3 double courts",
+      "1 single court",
+      "Bar & lounge",
+      "Outdoor lounge",
+      "Training & tournaments",
+      "Booking via app",
+      `Opening ${OPENING_WINDOW_EN}`,
+    ],
     scroll: "Scroll",
 
     visionLabel: "Our vision",
@@ -110,14 +132,14 @@ const COPY = {
     floorplanIntro:
       "3 double and 1 single court, our own bar & lounge area, and an outdoor lounge to hang out on after the match.",
     amenities: [
-      { icon: "sports_tennis", title: "3 double padel courts" },
-      { icon: "sports_tennis", title: "1 single padel court" },
-      { icon: "local_bar", title: "Bar & lounge area", text: "With seating" },
-      { icon: "checkroom", title: "Changing rooms & showers", text: "Below the bar area" },
-      { icon: "deck", title: "Outdoor lounge", text: "With seating & plants" },
-      { icon: "emoji_events", title: "Training, tournaments & events", text: "For beginners and corporate events" },
-      { icon: "wifi", title: "WiFi & co-working", text: "For breaks or working on the go" },
-      { icon: "smartphone", title: "Digital booking & access", text: "Entirely via app, around the clock" },
+      { title: "3 double padel courts" },
+      { title: "1 single padel court" },
+      { title: "Bar & lounge area", text: "With seating" },
+      { title: "Changing rooms & showers", text: "Below the bar area" },
+      { title: "Outdoor lounge", text: "With seating & plants" },
+      { title: "Training, tournaments & events", text: "For beginners and corporate events" },
+      { title: "WiFi & co-working", text: "For breaks or working on the go" },
+      { title: "Digital booking & access", text: "Entirely via app, around the clock" },
     ],
 
     loungeLabel: "Community",
@@ -162,6 +184,56 @@ const COPY = {
     footerContactLabel: "Contact",
   },
 } as const;
+
+/** Headline that arrives word by word — each word rides up out of its own
+ *  clipping box, one after the next. Re-keyed on the text itself so switching
+ *  DE/EN replays the entrance instead of swapping the words silently. */
+function SplitHeadline({
+  text,
+  className = "",
+  delayMs = 0,
+}: {
+  text: string;
+  className?: string;
+  delayMs?: number;
+}) {
+  const words = text.split(" ");
+  return (
+    <h1 className={className}>
+      {words.map((word, i) => (
+        <span key={`${word}-${i}`} className="word-mask">
+          <span className="word-rise" style={{ animationDelay: `${delayMs + i * 95}ms` }}>
+            {word}
+            {i < words.length - 1 ? "\u00a0" : ""}
+          </span>
+        </span>
+      ))}
+    </h1>
+  );
+}
+
+/** Fact ticker along the bottom edge of the hero. Holds the list twice and
+ *  travels exactly half its width, so the loop never shows a seam. The second
+ *  pass is hidden from screen readers — it's the same words again. */
+function HeroTicker({ items }: { items: readonly string[] }) {
+  return (
+    <div className="marquee-track">
+      {[0, 1].map((pass) => (
+        <div key={pass} className="flex shrink-0 items-center" aria-hidden={pass === 1}>
+          {items.map((item) => (
+            <span
+              key={item}
+              className="flex items-center gap-5 pr-5 font-label text-[10px] md:text-[11px] font-medium tracking-[0.28em] uppercase text-white/75 whitespace-nowrap"
+            >
+              {item}
+              <span className="h-[3px] w-[3px] rounded-full bg-primary-fixed-dim/80 shrink-0" />
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function WaitlistForm({ t, locale }: { t: (typeof COPY)[Locale]; locale: Locale }) {
   const [email, setEmail] = useState("");
@@ -228,7 +300,17 @@ function WaitlistForm({ t, locale }: { t: (typeof COPY)[Locale]; locale: Locale 
 
       {status === "success" ? (
         <div className="flex flex-col items-center gap-3 text-center text-secondary bg-surface-container-lowest rounded-2xl p-8 md:p-10 editorial-shadow">
-          <span className="material-symbols-outlined text-4xl">check_circle</span>
+          {/* Drawn, not an icon-font glyph — a single round-capped stroke,
+              the same hairline weight as the rules elsewhere on the page. */}
+          <svg viewBox="0 0 32 32" className="w-9 h-9" fill="none" aria-hidden="true">
+            <path
+              d="M6 17.5 12.5 24 26 8.5"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
           <div>
             <p className="font-medium text-lg">{t.successTitle}</p>
             <p className="text-sm text-on-surface-variant font-light">{t.successText}</p>
@@ -369,7 +451,7 @@ export default function ComingSoonPage() {
           taller than the screen; the section inside stays pinned while the
           split plays out. */}
       <div ref={heroRef} className="relative h-[200vh]">
-        <section className="sticky top-0 h-screen overflow-hidden flex flex-col justify-end px-6 md:px-16 pb-20 md:pb-24 bg-background">
+        <section className="sticky top-0 h-screen overflow-hidden flex flex-col justify-end px-6 md:px-16 pb-24 md:pb-32 bg-background">
           {/* Sits behind the halves, so opening the curtain lands on the
               wordmark rather than on an empty black screen. */}
           <div
@@ -387,14 +469,14 @@ export default function ComingSoonPage() {
             className="absolute inset-y-0 left-0 w-1/2 overflow-hidden z-10"
             style={{ transform: `translate3d(${-heroProgress * 100}%,0,0)`, willChange: heroWillChange }}
           >
-            <div className="absolute inset-y-0 left-0 w-screen">
+            <div className="absolute inset-y-0 left-0 w-screen ken-burns">
               <Image
                 src="/aussenansicht.jpg"
                 alt={`${SITE_NAME} building exterior`}
                 fill
                 priority
                 sizes="100vw"
-                className="object-cover object-[2%_center] md:object-center"
+                className="object-cover object-[40%_center] md:object-center"
               />
             </div>
           </div>
@@ -404,14 +486,14 @@ export default function ComingSoonPage() {
             className="absolute inset-y-0 right-0 w-1/2 overflow-hidden z-10"
             style={{ transform: `translate3d(${heroProgress * 100}%,0,0)`, willChange: heroWillChange }}
           >
-            <div className="absolute inset-y-0 right-0 w-screen">
+            <div className="absolute inset-y-0 right-0 w-screen ken-burns">
               <Image
                 src="/aussenansicht.jpg"
                 alt=""
                 fill
                 priority
                 sizes="100vw"
-                className="object-cover object-[2%_center] md:object-center"
+                className="object-cover object-[40%_center] md:object-center"
               />
             </div>
           </div>
@@ -426,6 +508,9 @@ export default function ComingSoonPage() {
             <div className="grain-overlay" />
           </div>
 
+          {/* Three lines, not five blocks. The address sits above a rule that
+              draws itself in, the headline arrives word by word, and a single
+              meta line carries what the old badge + two paragraphs said. */}
           <div
             className="relative z-30 max-w-2xl"
             style={{
@@ -440,36 +525,46 @@ export default function ComingSoonPage() {
                 compete with both. */}
             <span className="sr-only">{SITE_NAME} – Urban Padel Club</span>
 
-            <span className="inline-flex items-center gap-2 text-white/70 mb-6">
-              <span className="material-symbols-outlined text-sm shrink-0">location_on</span>
-              <span className="font-label text-[11px] tracking-[0.3em] uppercase">
+            <div className="rise-in" style={{ animationDelay: "120ms" }}>
+              <span className="block font-label text-[10px] md:text-[11px] font-medium tracking-[0.26em] md:tracking-[0.34em] uppercase text-white/80">
                 {t.addressPill}
               </span>
-            </span>
+              <span
+                className="block h-px w-16 bg-primary-fixed-dim/70 mt-3 mb-6 rule-draw"
+                style={{ animationDelay: "420ms" }}
+              />
+            </div>
 
-            <h1 className="text-5xl md:text-7xl font-headline italic leading-[1.05] tracking-tighter text-white mb-5">
-              {t.headline}
-            </h1>
+            <SplitHeadline
+              key={`${locale}-headline`}
+              text={t.headline}
+              delayMs={260}
+              className="display text-[3.25rem] leading-[0.98] md:text-[5.5rem] lg:text-[6.25rem] text-white mb-6"
+            />
 
-            <span className="inline-block font-label text-[11px] tracking-[0.3em] uppercase text-primary-fixed-dim mb-6 pb-1 border-b border-primary-fixed-dim/40">
-              {t.comingSoon}
-            </span>
-
-            <p className="text-lg font-body font-light text-white mb-3 max-w-lg">
-              {t.subheadline}
-            </p>
-
-            <p className="text-sm font-body font-light text-stone-300 leading-relaxed max-w-md">
-              {t.description}
+            <p
+              className="rise-in font-label text-[10px] md:text-xs font-medium tracking-[0.18em] md:tracking-[0.24em] uppercase text-white/80"
+              style={{ animationDelay: "620ms" }}
+            >
+              {t.heroMeta}
             </p>
           </div>
 
           <div
-            className="relative z-30 hidden md:flex mt-14 items-center gap-3 text-white/60 animate-bounce-y"
-            style={{ opacity: contentOpacity }}
+            className="relative z-30 hidden md:flex mt-12 items-center gap-3 text-white/55 animate-bounce-y rise-in"
+            style={{ opacity: contentOpacity, animationDelay: "900ms" }}
           >
             <span className="font-label text-[10px] tracking-[0.3em] uppercase">{t.scroll}</span>
             <span className="w-10 h-px bg-white/40" />
+          </div>
+
+          {/* Fact strip along the bottom edge — the club's specifics keep
+              moving instead of sitting in a paragraph nobody reads. */}
+          <div
+            className="absolute inset-x-0 bottom-0 z-30 overflow-hidden border-t border-white/15 bg-black/25 py-3 backdrop-blur-[2px]"
+            style={{ opacity: contentOpacity }}
+          >
+            <HeroTicker key={`${locale}-ticker`} items={t.ticker} />
           </div>
         </section>
       </div>
@@ -481,10 +576,10 @@ export default function ComingSoonPage() {
       <section className="relative overflow-hidden px-6 md:px-12 py-20 md:py-28 bg-primary text-on-primary">
         <div className="grain-overlay" />
         <Reveal className="relative max-w-2xl mx-auto text-center">
-          <span className="material-symbols-outlined text-4xl mb-5 block text-primary-fixed-dim">
-            mail
+          <span className="font-label text-[10px] font-medium tracking-[0.34em] uppercase text-primary-fixed-dim mb-5 block">
+            {t.comingSoon}
           </span>
-          <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight mb-4">
+          <h2 className="display text-[2rem] md:text-5xl mb-4">
             {t.formTitle}
           </h2>
           <p className="text-white/80 font-light leading-relaxed max-w-md mx-auto mb-10">
@@ -542,7 +637,7 @@ export default function ComingSoonPage() {
               and spreads the rag evenly instead. tracking only tightens from
               md up — at phone sizes the tighter setting reads as cramped
               rather than as deliberate display type. */}
-          <h2 className="text-[2rem] md:text-6xl lg:text-7xl font-headline italic tracking-tight md:tracking-tighter leading-[1.08] md:leading-[1.05] text-balance mb-8 md:mb-10">
+          <h2 className="display text-[2.05rem] md:text-5xl lg:text-6xl leading-[1.06] md:leading-[1.02] text-balance mb-8 md:mb-10">
             {t.visionHeadline}
           </h2>
           <p className="text-on-surface-variant font-light leading-relaxed max-w-xl mx-auto text-pretty md:text-lg">
@@ -559,7 +654,7 @@ export default function ComingSoonPage() {
         <div className="max-w-screen-xl mx-auto">
         <Reveal className="text-center mb-16">
           <span className="section-label justify-center inline-block">{t.floorplanLabel}</span>
-          <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight mb-6">
+          <h2 className="display text-[2rem] md:text-5xl mb-6">
             {t.floorplanHeadline}
           </h2>
           <p className="text-on-surface-variant font-light leading-relaxed max-w-xl mx-auto">
@@ -580,19 +675,26 @@ export default function ComingSoonPage() {
           </Parallax>
         </Reveal>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Spec list, not a card grid. Numbered rows on hairlines read like a
+            plan legend — which is exactly what sits above them — and they let
+            the floor-plan image stay the only object in this section. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-14 border-t border-outline-variant/60">
           {t.amenities.map((a, i) => (
-            <Reveal key={a.title} delayMs={100 + i * 60}>
-              <div className="group h-full bg-surface-container-lowest rounded-xl p-5 md:p-6 editorial-shadow transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
-                <span className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-primary/10 text-primary mb-4 transition-all duration-300 group-hover:bg-primary group-hover:text-on-primary group-hover:scale-110">
-                  <span className="material-symbols-outlined text-xl">{a.icon}</span>
+            <Reveal key={a.title} delayMs={60 + i * 45}>
+              <div className="group flex items-baseline gap-4 md:gap-6 border-b border-outline-variant/60 py-4 md:py-5 transition-colors duration-300 hover:border-primary/50">
+                <span className="display text-sm md:text-base text-outline/80 w-7 shrink-0 tabular-nums transition-colors duration-300 group-hover:text-primary">
+                  {String(i + 1).padStart(2, "0")}
                 </span>
-                <p className="font-body text-sm font-medium leading-snug transition-colors duration-300 group-hover:text-primary">
-                  {a.title}
-                </p>
-                {"text" in a && a.text && (
-                  <p className="text-xs text-on-surface-variant font-light mt-1">{a.text}</p>
-                )}
+                <div className="min-w-0 flex-1 transition-transform duration-300 group-hover:translate-x-1">
+                  <p className="font-body text-[0.95rem] md:text-base font-medium leading-snug">
+                    {a.title}
+                  </p>
+                  {"text" in a && a.text && (
+                    <p className="text-xs md:text-sm text-on-surface-variant font-light mt-1 leading-relaxed">
+                      {a.text}
+                    </p>
+                  )}
+                </div>
               </div>
             </Reveal>
           ))}
@@ -605,7 +707,7 @@ export default function ComingSoonPage() {
       <section className="relative z-10 bg-background px-6 md:px-12 py-24 max-w-screen-xl mx-auto">
         <Reveal className="text-center mb-16">
           <span className="section-label justify-center inline-block">{t.loungeLabel}</span>
-          <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight mb-6">
+          <h2 className="display text-[2rem] md:text-5xl mb-6">
             {t.loungeHeadline}
           </h2>
           <p className="text-on-surface-variant font-light leading-relaxed max-w-xl mx-auto">
@@ -635,7 +737,7 @@ export default function ComingSoonPage() {
             <span className="font-label text-xs tracking-[0.3em] uppercase text-primary-container mb-4 block">
               {t.bookingLabel}
             </span>
-            <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight mb-6">
+            <h2 className="display text-[2rem] md:text-5xl mb-6">
               {t.bookingHeadline}
             </h2>
             <p className="text-stone-300 font-light max-w-xl mx-auto leading-relaxed mb-6">
@@ -652,7 +754,7 @@ export default function ComingSoonPage() {
             {t.bookingSteps.map((s, i) => (
               <Reveal key={s.n} delayMs={i * 80}>
                 <div className="group transition-transform duration-300 hover:-translate-y-1">
-                  <span className="font-headline italic text-2xl text-primary-container mb-3 block">
+                  <span className="display text-3xl text-primary-container mb-3 block">
                     {s.n}
                   </span>
                   <h3 className="font-body font-medium mb-2 transition-colors duration-300 group-hover:text-primary-fixed-dim">
@@ -674,7 +776,7 @@ export default function ComingSoonPage() {
         <div className="max-w-screen-xl mx-auto">
         <Reveal className="text-center mb-16">
           <span className="section-label justify-center inline-block">{t.locationLabel}</span>
-          <h2 className="text-3xl md:text-4xl font-headline italic tracking-tight">
+          <h2 className="display text-[2rem] md:text-5xl">
             {t.locationHeadline}
           </h2>
         </Reveal>
@@ -697,8 +799,8 @@ export default function ComingSoonPage() {
 
           <div className="bg-surface-container-lowest rounded-xl p-8 editorial-shadow flex flex-col justify-center gap-6">
             <div>
-              <span className="material-symbols-outlined text-primary text-2xl mb-3 block">
-                location_on
+              <span className="font-label text-[10px] font-medium tracking-[0.34em] uppercase text-primary mb-3 block">
+                {t.locationLabel}
               </span>
               <p className="font-body">
                 {VENUE_ADDRESS.street}
@@ -715,7 +817,15 @@ export default function ComingSoonPage() {
               >
                 {t.openGoogle}
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-on-primary transition-transform duration-300 group-hover:rotate-45 shrink-0">
-                  <span className="material-symbols-outlined text-base">arrow_outward</span>
+                  <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" aria-hidden="true">
+                    <path
+                      d="M4 12 12 4M5.5 4H12v6.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </span>
               </a>
               <a
@@ -726,7 +836,15 @@ export default function ComingSoonPage() {
               >
                 {t.openApple}
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-on-primary transition-transform duration-300 group-hover:rotate-45 shrink-0">
-                  <span className="material-symbols-outlined text-base">arrow_outward</span>
+                  <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" aria-hidden="true">
+                    <path
+                      d="M4 12 12 4M5.5 4H12v6.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </span>
               </a>
             </div>

@@ -62,9 +62,13 @@ const config: Config = {
         "inverse-primary": "#ffa7b5",
       },
       fontFamily: {
-        headline: ["Noto Serif", "serif"],
-        body: ["Manrope", "sans-serif"],
-        label: ["Manrope", "sans-serif"],
+        // One family does display + labels (Archivo, variable weight/width),
+        // a second does running text (Inter Tight). Keeping display and label
+        // on the same family is what ties the tracked uppercase captions to
+        // the headlines instead of leaving them floating in a third voice.
+        headline: ["Archivo", "system-ui", "sans-serif"],
+        body: ["Inter Tight", "system-ui", "sans-serif"],
+        label: ["Archivo", "system-ui", "sans-serif"],
       },
       borderRadius: {
         DEFAULT: "0.125rem",

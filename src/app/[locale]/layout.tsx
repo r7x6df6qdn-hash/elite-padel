@@ -55,6 +55,13 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
+      {/* Icon font, loaded only on the routes that actually use it — the
+          public coming-soon page draws its handful of marks as inline SVG
+          and pulls no icon font at all. */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet"
+      />
       {/* Correct <html lang> for the active locale. Root layout defaults to
           lang="de" because it must contain <html> statically (Next.js
           requirement) and has no access to the URL. Non-JS crawlers get the

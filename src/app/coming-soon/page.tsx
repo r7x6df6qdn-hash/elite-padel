@@ -410,11 +410,13 @@ export default function ComingSoonPage() {
           below), so the logo and language toggle are always reachable, not
           just buried inside the hero. Shrinks and firms up its backdrop once
           the page scrolls, instead of sitting static the whole time. */}
+      {/* Solid cream from the first frame. It used to start translucent and
+          firm up on scroll, so the bar visibly changed colour on the way down
+          — over a photo hero that just looks like a bug. Only the rule and the
+          shadow arrive on scroll now; the surface never moves. */}
       <header
-        className={`fixed top-0 inset-x-0 z-30 md:backdrop-blur-md transition-all duration-300 ${
-          scrolled
-            ? "bg-background md:bg-background/95 border-b border-outline-variant/30 shadow-sm"
-            : "bg-background/70 backdrop-blur-md border-b border-transparent"
+        className={`fixed top-0 inset-x-0 z-30 bg-background transition-all duration-300 ${
+          scrolled ? "border-b border-outline-variant/30 shadow-sm" : "border-b border-transparent"
         }`}
       >
         <div
@@ -453,7 +455,7 @@ export default function ComingSoonPage() {
           taller than the screen; the section inside stays pinned while the
           split plays out. */}
       <div ref={heroRef} className="relative h-[200vh]">
-        <section className="sticky top-0 h-screen overflow-hidden flex flex-col justify-end px-6 md:px-16 pb-24 md:pb-32 bg-background">
+        <section className="sticky top-0 h-[100dvh] overflow-hidden flex flex-col justify-end px-6 md:px-16 pb-24 md:pb-32 bg-background">
           {/* Sits behind the halves, so opening the curtain lands on the
               wordmark rather than on an empty black screen. */}
           <div
@@ -478,7 +480,7 @@ export default function ComingSoonPage() {
                 fill
                 priority
                 sizes="100vw"
-                className="object-cover object-center"
+                className="object-cover object-[70%_center] md:object-center"
               />
             </div>
           </div>
@@ -495,7 +497,7 @@ export default function ComingSoonPage() {
                 fill
                 priority
                 sizes="100vw"
-                className="object-cover object-center"
+                className="object-cover object-[70%_center] md:object-center"
               />
             </div>
           </div>
